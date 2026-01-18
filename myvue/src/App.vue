@@ -1,6 +1,7 @@
 <template>
 <!-- 绑定massg弹出前置层 -->
 <NConfigProvider>
+    <n-dialog-provider>
     <n-space vertical size="large">
         <n-layout>
             <n-layout-header >
@@ -13,6 +14,7 @@
             </n-layout-content>
         </n-layout>
     </n-space>
+    </n-dialog-provider>
 </NConfigProvider>
 </template>
 

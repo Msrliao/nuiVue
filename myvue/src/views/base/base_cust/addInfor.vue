@@ -134,9 +134,11 @@
 import { ref, onUnmounted } from 'vue'
 import emitter from "@/utils/emitter"
 import type { TreeSelectOption, FormInst } from 'naive-ui'
+import { useMessage } from 'naive-ui'
 
 const formRef = ref<FormInst | null>(null)
 const showModal = ref(false)
+const message=useMessage()
 const formValue = ref({
     xm: '',
     bm: '',
@@ -227,7 +229,7 @@ emitter.on("addInforShwo",()=>{
 }) 
 //  重要：组件卸载时移除事件监听，防止内存泄漏
 onUnmounted(() => {
-  emitter.off("addInforShwo", eventHandler)
+  emitter.off("addInforShwo")
 })
 </script>
 <style scoped>

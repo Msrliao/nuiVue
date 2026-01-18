@@ -20,7 +20,13 @@ interface RowData {
 
 function createColumns(): DataTableColumns<RowData> {
   return [
-  
+    {
+      type: 'selection',
+      multiple: false,
+      disabled(row: WarehouseData) {
+        return row.ckmc === 'Edward King 3'
+      },
+    },
     {
       title: 'Name',
       key: 'name',

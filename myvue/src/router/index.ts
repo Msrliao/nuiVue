@@ -10,9 +10,10 @@ const componentMap = {
     // basicInfor 基本资料
     '配件资料': markRaw(defineAsyncComponent(() => import('@/views/base/base_part/index.vue'))),
     '客户资料': markRaw(defineAsyncComponent(() => import('@/views/base/base_cust/index.vue'))),
-    // '物流资料': markRaw(defineAsyncComponent(() => import('@/views/basicInfor/LogisticsData.vue'))),
+    '仓库管理': markRaw(defineAsyncComponent(() => import('@/views/base/base_ware/index.vue'))),
+    '物流资料': markRaw(defineAsyncComponent(() => import('@/views/base/base_ware/index.vue'))),
     // '员工资料': markRaw(defineAsyncComponent(() => import('@/views/basicInfor/EmployeesInfor.vue'))),
-    // '仓库管理': markRaw(defineAsyncComponent(() => import('@/views/basicInfor/StoreroomData.vue'))),
+    
     // // purchase 进货管理
     // '采购进货': markRaw(defineAsyncComponent(() => import('@/views/purchase/Purchase.vue'))),
     // '采购单据查询': markRaw(defineAsyncComponent(() => import('@/views/purchase/PurchaseQuery/PurchaseQueryReceipt.vue'))),

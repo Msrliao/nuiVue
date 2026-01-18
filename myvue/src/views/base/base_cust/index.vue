@@ -29,11 +29,11 @@ const rules = {
         required: true,
         message: '请选择',
         trigger: ['input']
-    }
+    },
     khdq: {
         required: true,
         message: '请选择',
-        trigger: ['input']
+        trigger: ['slet']
     }
 }
 

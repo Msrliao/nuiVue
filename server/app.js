@@ -4,6 +4,9 @@ const bodyParser = require('body-parser');
 const config = require('./config');
 const { testConnection } = require('./pgsqlDemo/db');
 const menuService = require('./pgsqlDemo/menuService');
+const warehouseService = require('./pgsqlDemo/warehouseService');
+const positionService = require('./pgsqlDemo/positionService');
+
 
 // 初始化Express应用
 const app = express();
@@ -150,6 +153,124 @@ app.post('/api/menus/batch', async (req, res) => {
   } catch (error) {
     console.error('批量操作菜单失败:', error);
     errorResponse(res, 500, '批量操作菜单失败', error.message);
+  }
+});
+
+/** 仓库管理API*/
+//获取仓库列表
+app.get('/api/warehouses', async (req, res) => {
+  try {
+    const warehouses = await warehouseService.getAllWarehouses();
+    successResponse(res, warehouses, '获取仓库列表成功');
+  } catch (error) {
+    errorResponse(res, 500, '获取仓库列表失败', error.message);
+  }
+});
+// 获取仓库详情
+app.get('/api/warehouses/:id', async (req, res) => {
+  try {
+    const warehouse = await warehouseService.getWarehouseById(req.params.id);
+    if (warehouse) {
+      successResponse(res, warehouse, '获取仓库详情成功');
+    } else {
+      errorResponse(res, 404, '仓库不存在', '未找到指定ID的仓库');
+    }
+  } catch (error) {
+    errorResponse(res, 500, '获取仓库详情失败', error.message);
+  }
+});
+// 创建仓库
+app.post('/api/warehouses', async (req, res) => {
+  try {
+    const warehouse = await warehouseService.createWarehouse(req.body);
+    successResponse(res, warehouse, '创建仓库成功');
+  } catch (error) {
+    errorResponse(res, 400, '创建仓库失败', error.message);
+  }
+});
+// 更新仓库
+app.put('/api/warehouses/:id', async (req, res) => {
+  try {
+    const warehouse = await warehouseService.updateWarehouse(req.params.id, req.body);
+    if (warehouse) {
+      successResponse(res, warehouse, '更新仓库成功');
+    } else {
+      errorResponse(res, 404, '仓库不存在', '未找到指定ID的仓库');
+    }
+  } catch (error) {
+    errorResponse(res, 400, '更新仓库失败', error.message);
+  }
+});
+// 删除仓库
+app.delete('/api/warehouses/:id', async (req, res) => {
+  try {
+    await warehouseService.deleteWarehouse(req.params.id);
+    successResponse(res, null, '删除仓库成功');
+  } catch (error) {
+    errorResponse(res, 500, '删除仓库失败', error.message);
+  }
+});
+
+// 仓位管理API
+app.get('/api/positions', async (req, res) => {
+  try {
+    const positions = await positionService.getAllPositions();
+    successResponse(res, positions, '获取仓位列表成功');
+  } catch (error) {
+    errorResponse(res, 500, '获取仓位列表失败', error.message);
+  }
+});
+
+app.get('/api/positions/:id', async (req, res) => {
+  try {
+    const position = await positionService.getPositionById(req.params.id);
+    if (position) {
+      successResponse(res, position, '获取仓位详情成功');
+    } else {
+      errorResponse(res, 404, '仓位不存在', '未找到指定ID的仓位');
+    }
+  } catch (error) {
+    errorResponse(res, 500, '获取仓位详情失败', error.message);
+  }
+});
+
+app.get('/api/positions/warehouse/:warehouseId', async (req, res) => {
+  try {
+    const positions = await positionService.getPositionsByWarehouseId(req.params.warehouseId);
+    successResponse(res, positions, '获取仓库仓位列表成功');
+  } catch (error) {
+    errorResponse(res, 500, '获取仓库仓位列表失败', error.message);
+  }
+});
+
+app.post('/api/positions', async (req, res) => {
+  try {
+    const position = await positionService.createPosition(req.body);
+    successResponse(res, position, '创建仓位成功');
+  } catch (error) {
+    errorResponse(res, 400, '创建仓位失败', error.message);
+  }
+});
+
+app.put('/api/positions/:id', async (req, res) => {
+  try {
+    const position = await positionService.updatePosition(req.params.id, req.body);
+    if (position) {
+      successResponse(res, position, '更新仓位成功');
+    } else {
+      errorResponse(res, 404, '仓位不存在', '未找到指定ID的仓位');
+    }
+  } catch (error) {
+    errorResponse(res, 400, '更新仓位失败', error.message);
+  }
+});
+
+app.delete('/api/positions/:id', async (req, res) => {
+  try {
+    await positionService.deletePosition(req.params.id);
+    successResponse(res, null, '删除仓位成功');
+  } catch (error) {
+    errorResponse(res, 500, '删除仓位失败', error.message);
   }
 });
 
