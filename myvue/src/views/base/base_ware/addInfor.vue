@@ -65,6 +65,7 @@ import apiClient from '@/utils/apiClient'
 const formRef = ref<FormInst | null>(null)
 // 定义遮罩层
 const showModal = ref(false)
+// 按钮加载
 const butLoading=ref(false)
 
 // 定义提交数据
@@ -108,31 +109,32 @@ function handleCancel() {
 
 // 表单提交函数
 async function handleValidateClick() {
+    if (!formRef.value) return
     butLoading.value = true
-  if (!formRef.value) return
-  try {
-    // 校验数据
-    await formRef.value.validate()
-    console.log("formValue.value",formValue.value)
-    // 调用API提交数据
-    
-    const forData=formValue.value
-    const response = forData.id
-        ?await apiClient.put(`/warehouses/${forData.id}`, forData)
-        :await apiClient.post('/warehouses',forData);
+
+    try {
+        // 校验数据
+        await formRef.value.validate()
+        // console.log("formValue.value",formValue.value)
+        // 调用API提交数据
         
-    response.code === 200
-        ?message.success('操作成功!')
-        :message.error('操作失败！')
-    
-    // 关闭弹窗并清空表单
-    handleCancel()
-    // 通知表格组件刷新数据
-    emitter.emit('refreshWarehouseData')
-  } catch (error: any) {
-    message.error(error.message || '操作失败！')
-  }
-  butLoading.value = false
+        const forData=formValue.value
+        const response = forData.id
+            ?await apiClient.put(`/warehouses/${forData.id}`, forData)
+            :await apiClient.post('/warehouses',forData);
+            
+        response.code === 200
+            ?message.success('操作成功!')
+            :message.error('操作失败！')
+        
+        // 关闭弹窗并清空表单
+        handleCancel()
+        // 通知表格组件刷新数据
+        emitter.emit('refreshWarehouseData')
+    } catch (error: any) {
+        message.error(error.message || '操作失败！')
+    }
+    butLoading.value = false
 }
 // 组件挂载时获取数据
 onMounted(() => {

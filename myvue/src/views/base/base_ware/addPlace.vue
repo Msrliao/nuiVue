@@ -16,9 +16,8 @@
                 label-width="auto"
             >
                 <n-grid cols="1 s:1 m:1 l:1 xl:1 2xl:1" responsive="screen">
-                    {{ckmc}}
-                    <n-form-item-gi  label="仓库名称:" path="cwmc">
-                        <n-input v-model:value="formValue.cwmc" placeholder="请输入仓库名称" />
+                    <n-form-item-gi  label="仓库名称:" path="position_name">
+                        <n-input v-model:value="formValue.position_name" placeholder="请输入仓库名称" />
                     </n-form-item-gi >
                     
                 </n-grid >
@@ -46,11 +45,12 @@ import apiClient from '@/utils/apiClient'
 const formRef = ref<FormInst | null>(null)
 // 定义遮罩层
 const showModal = ref(false)
+const tableSlatData = ref(null)
 // 定义提交数据
 const formValue = ref({
     warehouse_id: '',
-    ckmc: '',
-    cwmc: '',
+    position_name: '',
+    parent_id:''
 })
 // 定义提示框
 const message = useMessage()
@@ -70,8 +70,8 @@ function handleClearForm() {
   // 重置表单数据
   formValue.value = {
     warehouse_id: '',
-    ckmc: '',
-    cwmc: '',
+    position_name: '',
+    parent_id:''
   }
   // 清除表单校验状态
   formRef.value.restoreValidation()
@@ -84,46 +84,70 @@ function handleCancel() {
 
 // 表单提交函数
 async function handleValidateClick() {
-  if (!formRef.value) return
-  try {
-    // 校验数据
-    await formRef.value.validate()
-    // 调用API提交数据
-    const response = await apiClient.post('/?', formValue.value)
   
-    message.success('仓位创建成功')
-    // 关闭弹窗并清空表单
-    handleCancel()
-    // 通知表格组件刷新数据
-    emitter.emit('placeAddInforShwo')
-  } catch (error: any) {
-    message.error(error.message || '仓位创建失败')
-  }
+    if (!formRef.value) return
+    
+    try {
+
+        // 校验数据
+        await formRef.value.validate()
+        console.log("formValue--",formValue.value,tableSlatData.value)
+        if(formValue.value.id){
+            const response = await apiClient.put(`/positions/${formValue.value.id}`, formValue.value)
+            console.log('response',response)
+            if(response.code === 200){
+                message.success('仓位更新成功')
+                // 关闭弹窗并清空表单
+                handleCancel()
+                // 通知表格组件刷新数据
+                emitter.emit('selectWarehouse',tableSlatData.value)
+            }else{
+                message.success('操作失败')
+            }
+             
+
+        }else{
+            // 调用API提交数据
+            const response = await apiClient.post('/positions', formValue.value)
+            
+            if(response.code === 200){
+                message.success('仓位创建成功')
+                // 关闭弹窗并清空表单
+                handleCancel()
+                // 通知表格组件刷新数据
+                emitter.emit('selectWarehouse',tableSlatData.value)
+            }else{
+                message.success('操作失败')
+            }
+        }
+        
+    } catch (error: any) {
+        message.error(error.message || '操作失败')
+    }
 }
 // 组件挂载时获取数据
 onMounted(() => {
     
     //  绑定显示事件
-    emitter.on("placeAddInforShwo",(value?:FormInst)=>{
+       
+    emitter.on("showAddPlaceModal",(value?: FormInst,v2:FormInst)=>{
+        console.log('value?:',value)
         if (value) {
-            formValue.value = {
-                warehouse_id: value.warehouse_id || '',
-                ckmc: value.ckmc || '',
-                cwmc: value.cwmc || '',
-               
+            
+            if(value.id){
+                    tableSlatData.value = value
+                    formValue.value = {
+                    warehouse_id: value.id || '', 
+                    position_name:''         
+                }
+            }else if (value.key){
+                tableSlatData.value =v2
+                formValue.value = {
+                    id:value.key,
+                    position_name: value.label || '',
+                }
             }
-        }
-        showModal.value = true
-    }) 
-    
-    emitter.on("showAddPlaceModal",(value?: arr)=>{
-        if (value) {
-            formValue.value = {
-                warehouse_id: value.warehouse_id || '',
-                ckmc: value.ckmc || '',
-                cwmc: value.cwmc || '',
-               
-            }
+            
         }
         showModal.value = true
     })
@@ -131,7 +155,7 @@ onMounted(() => {
 //  重要：组件卸载时移除事件监听，防止内存泄漏
 onUnmounted(() => {
     emitter.off("showAddPlaceModal")
-    emitter.off("placeAddInforShwo")
+    
 })
 </script>
 <style scoped>

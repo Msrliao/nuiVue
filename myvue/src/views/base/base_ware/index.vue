@@ -26,7 +26,7 @@ interface WarehouseData {
 const selectedWarehouseId = ref<WarehouseData | null>(null)
 
 // 监听仓库行点击事件
-function handleWarehouseRowClick(row: any) {
+function handleWarehouseRowClick(row: WarehouseData) {
   selectedWarehouseId.value = row
 }
 
@@ -39,7 +39,7 @@ function addPlaceShwo () {
     message.error('请先选择库房')
   }
 }
-// 触发添加仓库弹窗事件
+// 触发添加仓房弹窗事件
 function addInforShwo () {
   emitter.emit("wareAddInforShwo")
 }
@@ -66,7 +66,7 @@ onUnmounted(() => {
                 添加库位
         </n-button>
     </n-flex>
-    <n-card title="库位选择">
+    <n-card :title="selectedWarehouseId? `仓库：${selectedWarehouseId.ckmc}` : '未选择仓库'">
         <PlaceTree />
     </n-card>
     <n-flex>

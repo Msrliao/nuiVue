@@ -92,22 +92,19 @@ async function createPosition(positionData) {
 
 // 更新仓位
 async function updatePosition(id, positionData) {
-  const { position_name, parent_id, warehouse_id, description } = positionData;
+  const { position_name } = positionData;
   const client = await getClient();
   try {
     const result = await client.query(`
       UPDATE positions
-      SET position_name = $1, parent_id = $2, warehouse_id = $3, description = $4, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $5
+      SET position_name = $1, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
       RETURNING 
         id, 
         position_name, 
-        parent_id, 
-        warehouse_id, 
-        description, 
         TO_CHAR(created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at, 
         TO_CHAR(updated_at, 'YYYY-MM-DD HH24:MI:SS') as updated_at
-    `, [position_name, parent_id, warehouse_id, description, id]);
+    `, [position_name, id]);
     return result.rows[0] || null;
   } finally {
     client.release();

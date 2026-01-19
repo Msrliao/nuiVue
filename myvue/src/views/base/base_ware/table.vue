@@ -9,8 +9,6 @@
       :loading="loadingRef"
       striped
       :row-key="row => row.id"
-      
-    
     />
     <!-- 右键单击组件 -->
     <n-dropdown
@@ -32,6 +30,7 @@ import { useMessage, useDialog } from 'naive-ui'
 import { h, nextTick, ref, onMounted, onUnmounted } from 'vue'
 import apiClient from '@/utils/apiClient'
 import emitter from '@/utils/emitter'
+import { useSharedStore } from '@/store/useBaseWareStore'
 
 // 1. 定义仓库数据接口
 interface WarehouseData {
@@ -43,7 +42,8 @@ interface WarehouseData {
   created_at: string
   updated_at: string
 }
-const loadingRef = ref(null)
+// 定义表格加载
+const loadingRef = ref(false)
 //2. 定义仓库数据
 const warehouseData = ref<WarehouseData[]>([])
 // 定义默认选中项
@@ -57,6 +57,11 @@ async function fetchWarehouseData() {
     const response = await apiClient.get('/warehouses')
     if (response.code===200){
        warehouseData.value = response.data
+       if(warehouseData.value.length>0){
+        checkedRowKeys.value =[response.data[0].id]
+        
+       }
+       
     }else{
       message.error(response.message || '获取仓库数据失败')
     }
@@ -162,7 +167,7 @@ function handleSelect(key: string) {
   showDropdownRef.value = false
 }
 
-// 右键单击
+// 单击外部
 function onClickoutside() {
   showDropdownRef.value = false
    currentRow.value = null // 点击外部时清空当前行
@@ -172,7 +177,7 @@ function rowProps(row: WarehouseData) {
   return {
     // 右键点击事件
     onContextmenu: (e: MouseEvent) => {
-      console.log('row',row)
+      // console.log('row',row)
       // 保存当前右键点击的行数据
       currentRow.value = row
       // message.info(JSON.stringify(row, null, 2))
@@ -188,12 +193,17 @@ function rowProps(row: WarehouseData) {
     onClick: (e: MouseEvent) => {
       // 阻止事件冒泡，避免触发表格的点击事件
       e.stopPropagation()
-      console.log('行被点击了:', row)
+      // console.log('行被点击了:', row)
+      
+      // 获取当前行数据到pinia
+      useSharedStore.row=row
+
       checkedRowKeys.value=[row.id]
       // 发送仓库选择事件，通知仓位树形组件刷新
-      emitter.emit('selectWarehouse', row.id)
+      emitter.emit('selectWarehouse', row)
       // 发送行数据事件，可被父组件监听
       emitter.emit('warehouseRowClick', row)
+      
       // 高亮当前选中行
       currentRow.value = row
     }
