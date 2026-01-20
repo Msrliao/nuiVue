@@ -22,7 +22,7 @@
                     
                 </n-grid >
                 <n-flex justify="end">
-                        <n-button attr-type="button" type="success" @click="handleValidateClick">
+                        <n-button attr-type="button" :loading="butLoading" type="success" @click="handleValidateClick">
                             保存
                         </n-button>
                         <n-button attr-type="button" type="warning" @click="handleCancel">
@@ -37,15 +37,20 @@
 
 import { ref, onUnmounted, onMounted } from 'vue'
 import emitter from "@/utils/emitter"
-import type { TreeSelectOption, FormInst } from 'naive-ui'
+import type { FormInst } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
+import { useSharedStore } from '@/store/useBaseWareStore'
+import { storeToRefs } from 'pinia'
 
+// 获取表格选中数据
+const {row: tableSele}=storeToRefs(useSharedStore())
 // 定义formRef
 const formRef = ref<FormInst | null>(null)
 // 定义遮罩层
 const showModal = ref(false)
-const tableSlatData = ref(null)
+// 按钮加载
+const butLoading= ref(false)
 // 定义提交数据
 const formValue = ref({
     warehouse_id: '',
@@ -56,7 +61,7 @@ const formValue = ref({
 const message = useMessage()
 // 定义验证
 const rules = {
-    ckmc: {
+    position_name: {
         required: true,
         message: '请输入名称',
         trigger: 'blur',
@@ -69,9 +74,9 @@ function handleClearForm() {
   if (!formRef.value) return
   // 重置表单数据
   formValue.value = {
-    warehouse_id: '',
+    warehouse_id: null,
     position_name: '',
-    parent_id:''
+    parent_id:null
   }
   // 清除表单校验状态
   formRef.value.restoreValidation()
@@ -84,38 +89,32 @@ function handleCancel() {
 
 // 表单提交函数
 async function handleValidateClick() {
-  
     if (!formRef.value) return
-    
+    butLoading.value = true
     try {
-
+        
         // 校验数据
         await formRef.value.validate()
-        console.log("formValue--",formValue.value,tableSlatData.value)
-        if(formValue.value.id){
+        if(formValue.value.id){ //直接添加到仓库下
             const response = await apiClient.put(`/positions/${formValue.value.id}`, formValue.value)
-            console.log('response',response)
             if(response.code === 200){
                 message.success('仓位更新成功')
                 // 关闭弹窗并清空表单
                 handleCancel()
                 // 通知表格组件刷新数据
-                emitter.emit('selectWarehouse',tableSlatData.value)
+                emitter.emit('selectWarehouse')
             }else{
                 message.success('操作失败')
             }
-             
-
         }else{
             // 调用API提交数据
             const response = await apiClient.post('/positions', formValue.value)
-            
             if(response.code === 200){
                 message.success('仓位创建成功')
                 // 关闭弹窗并清空表单
                 handleCancel()
                 // 通知表格组件刷新数据
-                emitter.emit('selectWarehouse',tableSlatData.value)
+                emitter.emit('selectWarehouse')
             }else{
                 message.success('操作失败')
             }
@@ -124,37 +123,48 @@ async function handleValidateClick() {
     } catch (error: any) {
         message.error(error.message || '操作失败')
     }
+    butLoading.value = false
 }
 // 组件挂载时获取数据
 onMounted(() => {
-    
     //  绑定显示事件
-       
-    emitter.on("showAddPlaceModal",(value?: FormInst,v2:FormInst)=>{
-        console.log('value?:',value)
-        if (value) {
-            
-            if(value.id){
-                    tableSlatData.value = value
-                    formValue.value = {
-                    warehouse_id: value.id || '', 
-                    position_name:''         
-                }
-            }else if (value.key){
-                tableSlatData.value =v2
-                formValue.value = {
-                    id:value.key,
-                    position_name: value.label || '',
-                }
+    emitter.on("indexToAddPlaceShwo",()=>{
+        console.log('tableSele',tableSele)
+        if (tableSele.value) {
+            formValue.value = {
+                parent_id:null,
+                warehouse_id: tableSele.value.id || '', 
+                position_name:''         
             }
-            
+        }
+        showModal.value = true
+    })
+    emitter.on("TreeToUpPlaceShwo",(value: Array)=>{
+        if (value.key){
+            formValue.value = {
+                id:value.key,
+                position_name: value.label || '',
+            }
+        }
+        showModal.value = true
+    })
+    emitter.on("TreeToAddPlaceShwo",(value: Array)=>{
+        if (value.key){
+            formValue.value = {
+                warehouse_id: tableSele.value.id,
+                parent_id: value.key,
+                position_name: '',
+            }
         }
         showModal.value = true
     })
 })
 //  重要：组件卸载时移除事件监听，防止内存泄漏
 onUnmounted(() => {
-    emitter.off("showAddPlaceModal")
+    emitter.off("indexToAddPlaceShwo")
+    emitter.off("TreeToUpPlaceShwo")
+    emitter.off("TreeToAddPlaceShwo")
+
     
 })
 </script>

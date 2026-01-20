@@ -8,35 +8,21 @@ import AddInforVue from './addInfor.vue'
 import PlaceTree from './placeTree.vue'
 import AddPlaceVue from './addPlace.vue'
 import { useMessage } from 'naive-ui'
+import { useSharedStore } from '@/store/useBaseWareStore'
+import { storeToRefs } from 'pinia'
 
-
+// 定义提示信息
 const message = useMessage()
-// 1. 定义仓库数据接口
-interface WarehouseData {
-  id: number
-  ckmc: string
-  fzr?: string
-  lxdh?: string
-  bz?: string
-  created_at: string
-  updated_at: string
-}
-
-// 保存选中的仓库ID
-const selectedWarehouseId = ref<WarehouseData | null>(null)
-
-// 监听仓库行点击事件
-function handleWarehouseRowClick(row: WarehouseData) {
-  selectedWarehouseId.value = row
-}
+// 获取选中的仓库名
+const {row:selectName} = storeToRefs(useSharedStore())
 
 // 触发添加库位弹窗事件
 function addPlaceShwo () {
-  if (selectedWarehouseId.value) {
+  if (selectName.value) {
     // 如果有选中的仓库，将仓库ID传递给添加库位组件
-    emitter.emit('showAddPlaceModal', selectedWarehouseId.value)
+    emitter.emit('indexToAddPlaceShwo')
   } else {
-    message.error('请先选择库房')
+    message.error('请先选择要添加到哪个库房')
   }
 }
 // 触发添加仓房弹窗事件
@@ -44,15 +30,6 @@ function addInforShwo () {
   emitter.emit("wareAddInforShwo")
 }
 
-// 组件挂载时监听事件
-onMounted(() => {
-  emitter.on('warehouseRowClick', handleWarehouseRowClick)
-})
-
-// 组件卸载时移除事件监听
-onUnmounted(() => {
-  emitter.off('warehouseRowClick', handleWarehouseRowClick)
-})
 </script>
 <template>
     <n-flex >
@@ -66,7 +43,7 @@ onUnmounted(() => {
                 添加库位
         </n-button>
     </n-flex>
-    <n-card :title="selectedWarehouseId? `仓库：${selectedWarehouseId.ckmc}` : '未选择仓库'">
+    <n-card :title="selectName.ckmc? `仓库：${selectName.ckmc}` : '未选择仓库'">
         <PlaceTree />
     </n-card>
     <n-flex>

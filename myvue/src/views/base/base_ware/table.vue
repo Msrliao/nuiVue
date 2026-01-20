@@ -48,6 +48,19 @@ const loadingRef = ref(false)
 const warehouseData = ref<WarehouseData[]>([])
 // 定义默认选中项
 const checkedRowKeys = ref<number[]>([])
+// 定位表格选择的状态管理
+const SharedStore=useSharedStore()
+// 监控状态管理变化
+const unsubscribe = SharedStore.$subscribe((mutation, state) => {
+  // console.log('状态变化了！')  
+  // console.log('变化详情：', mutation)  
+  console.log('最新状态：', state)
+    if(state.row){
+      // 发送仓库选择事件，通知仓位树形组件刷新
+      emitter.emit('selectWarehouse')
+    }
+
+})
 
 // 3.初始化数据
 async function fetchWarehouseData() {
@@ -59,7 +72,7 @@ async function fetchWarehouseData() {
        warehouseData.value = response.data
        if(warehouseData.value.length>0){
         checkedRowKeys.value =[response.data[0].id]
-        
+        SharedStore.row = response.data[0]
        }
        
     }else{
@@ -196,13 +209,9 @@ function rowProps(row: WarehouseData) {
       // console.log('行被点击了:', row)
       
       // 获取当前行数据到pinia
-      useSharedStore.row=row
-
+      SharedStore.row=row
+      // 设置默认选中项
       checkedRowKeys.value=[row.id]
-      // 发送仓库选择事件，通知仓位树形组件刷新
-      emitter.emit('selectWarehouse', row)
-      // 发送行数据事件，可被父组件监听
-      emitter.emit('warehouseRowClick', row)
       
       // 高亮当前选中行
       currentRow.value = row
@@ -224,6 +233,7 @@ onMounted(() => {
 
 // 组件卸载时移除事件监听
 onUnmounted(() => {
+  unsubscribe()
   emitter.off('refreshWarehouseData', refreshData)
 })
 
