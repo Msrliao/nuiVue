@@ -40,7 +40,7 @@ import emitter from "@/utils/emitter"
 import type { FormInst } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
-import { useSharedStore } from '@/store/useBaseWareStore'
+import { useSharedStore } from '@/stores/useBaseWareStore'
 import { storeToRefs } from 'pinia'
 
 // 获取表格选中数据

@@ -28,11 +28,14 @@
 <script setup lang="ts">
 
 import type { DropdownOption, TreeOption } from 'naive-ui'
+import { useMessage, useDialog } from 'naive-ui'
+
 import {h, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import apiClient from '@/utils/apiClient'
 import emitter from '@/utils/emitter'
-import { useSharedStore } from '@/store/useBaseWareStore'
+import { useSharedStore } from '@/stores/useBaseWareStore'
 import { storeToRefs } from 'pinia'
+
 
 // 定义树形数据
 const treeData = ref<TreeOption[]>([])
@@ -42,6 +45,9 @@ const defaultExpandedKeys = ref<string[]>([])
 const {row: tableSelectedData} = storeToRefs(useSharedStore())
 // 加载层
 const show=ref(false)
+const dialog = useDialog()
+const message = useMessage()
+
 
 // 将扁平数据转换为树形结构
 function buildTree(nodes: any[], parentId: number | null = null): TreeOption[] {
@@ -76,7 +82,7 @@ async function fetchPositionData() {
   show.value =false
 }
 const showDropdownRef = ref(false)
-const optionsVal= ref([])
+const optionsVal= ref<TreeOption>(null)
 const xRef = ref(0)
 const yRef = ref(0)
 // 点击事件
@@ -136,10 +142,10 @@ function handleSelect(key: string) {
       onPositiveClick: async () => {
         try {
           // 调用API删除仓库
-          //await apiClient.delete(`/warehouses/${optionsVal.value?.key}`)
+          await apiClient.delete(`/positions/${optionsVal.value?.key}`)
           message.success('仓库删除成功')
           // 刷新表格数据
-          refreshData()
+          fetchPositionData()
         } catch (error: any) {
           message.error(error.message || '仓库删除失败')
         }

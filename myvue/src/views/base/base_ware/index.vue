@@ -1,5 +1,4 @@
 <script setup lang="ts" name='仓库资料'>
-import {ref,onMounted,onUnmounted} from 'vue'
 // 导入事件工具
 import emitter from "@/utils/emitter"
 //导入组件
@@ -8,7 +7,7 @@ import AddInforVue from './addInfor.vue'
 import PlaceTree from './placeTree.vue'
 import AddPlaceVue from './addPlace.vue'
 import { useMessage } from 'naive-ui'
-import { useSharedStore } from '@/store/useBaseWareStore'
+import { useSharedStore } from '@/stores/useBaseWareStore'
 import { storeToRefs } from 'pinia'
 
 // 定义提示信息
@@ -19,7 +18,7 @@ const {row:selectName} = storeToRefs(useSharedStore())
 // 触发添加库位弹窗事件
 function addPlaceShwo () {
   if (selectName.value) {
-    // 如果有选中的仓库，将仓库ID传递给添加库位组件
+    // 触发显示添加窗口事件
     emitter.emit('indexToAddPlaceShwo')
   } else {
     message.error('请先选择要添加到哪个库房')

@@ -30,18 +30,9 @@ import { useMessage, useDialog } from 'naive-ui'
 import { h, nextTick, ref, onMounted, onUnmounted } from 'vue'
 import apiClient from '@/utils/apiClient'
 import emitter from '@/utils/emitter'
-import { useSharedStore } from '@/store/useBaseWareStore'
+import { useSharedStore } from '@/stores/useBaseWareStore'
+import type {WarehouseData} from '@/types'
 
-// 1. 定义仓库数据接口
-interface WarehouseData {
-  id: number
-  ckmc: string
-  fzr?: string
-  lxdh?: string
-  bz?: string
-  created_at: string
-  updated_at: string
-}
 // 定义表格加载
 const loadingRef = ref(false)
 //2. 定义仓库数据
@@ -53,7 +44,7 @@ const SharedStore=useSharedStore()
 // 监控状态管理变化
 const unsubscribe = SharedStore.$subscribe((mutation, state) => {
   // console.log('状态变化了！')  
-  // console.log('变化详情：', mutation)  
+  console.log('变化详情：', mutation)  
   console.log('最新状态：', state)
     if(state.row){
       // 发送仓库选择事件，通知仓位树形组件刷新
