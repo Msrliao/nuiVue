@@ -35,6 +35,8 @@ import apiClient from '@/utils/apiClient'
 import emitter from '@/utils/emitter'
 import { useSharedStore } from '@/stores/useBaseWareStore'
 import { storeToRefs } from 'pinia'
+import type { ApiResponse, PositionData } from '@/types';
+
 
 
 // 定义树形数据
@@ -67,14 +69,14 @@ async function fetchPositionData() {
     let response
     if (tableSelectedData.value.id) {
       // 获取指定仓库的仓位
-      response = await apiClient.get(`/positions/warehouse/${tableSelectedData.value.id}`)
+      response = await apiClient.get(`/positions/warehouse/${tableSelectedData.value.id}`) as ApiResponse<PositionData[]>;
     } 
     
     if (response && response.code === 200) {
       // 构建树形结构
       treeData.value = buildTree(response.data)
       // 展开所有一级节点
-      defaultExpandedKeys.value = treeData.value.map(item => item.key)
+      defaultExpandedKeys.value = treeData.value.map(item => item.key as string)
     }
   } catch (error) {
     console.error('获取仓位数据失败:', error)
@@ -82,7 +84,7 @@ async function fetchPositionData() {
   show.value =false
 }
 const showDropdownRef = ref(false)
-const optionsVal= ref<TreeOption>(null)
+const optionsVal= ref<TreeOption | null>(null)
 const xRef = ref(0)
 const yRef = ref(0)
 // 点击事件

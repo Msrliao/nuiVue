@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { WarehouseData } from '@/types' 
+import type { WarehouseData } from '@/types' 
 
 export const useSharedStore = defineStore('tableRow', {
     

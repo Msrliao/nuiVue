@@ -8,7 +8,7 @@
       :row-props="rowProps"
       :loading="loadingRef"
       striped
-      :row-key="row => row.id"
+      :row-key="(row: WarehouseData) => row.id"
     />
     <!-- 右键单击组件 -->
     <n-dropdown
@@ -31,7 +31,7 @@ import { h, nextTick, ref, onMounted, onUnmounted } from 'vue'
 import apiClient from '@/utils/apiClient'
 import emitter from '@/utils/emitter'
 import { useSharedStore } from '@/stores/useBaseWareStore'
-import type {WarehouseData} from '@/types'
+import type { WarehouseData, ApiResponse } from '@/types'
 
 // 定义表格加载
 const loadingRef = ref(false)
@@ -50,7 +50,6 @@ const unsubscribe = SharedStore.$subscribe((mutation, state) => {
       // 发送仓库选择事件，通知仓位树形组件刷新
       emitter.emit('selectWarehouse')
     }
-
 })
 
 // 3.初始化数据
@@ -58,10 +57,10 @@ async function fetchWarehouseData() {
   loadingRef.value = true
   try {
     // 获取仓库列表
-    const response = await apiClient.get('/warehouses')
+    const response = await apiClient.get('/warehouses') as ApiResponse<WarehouseData[]>
     if (response.code===200){
        warehouseData.value = response.data
-       if(warehouseData.value.length>0){
+       if(warehouseData.value.length>0 && response.data[0]){
         checkedRowKeys.value =[response.data[0].id]
         SharedStore.row = response.data[0]
        }

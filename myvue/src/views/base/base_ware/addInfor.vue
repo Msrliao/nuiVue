@@ -56,10 +56,10 @@
 
 import { ref, onUnmounted, onMounted } from 'vue'
 import emitter from "@/utils/emitter"
-import type { TreeSelectOption, FormInst } from 'naive-ui'
+import type { FormInst } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
-
+import type { WarehouseData, ApiResponse } from '@/types'
 
 // 定义formRef
 const formRef = ref<FormInst | null>(null)
@@ -69,11 +69,13 @@ const showModal = ref(false)
 const butLoading=ref(false)
 
 // 定义提交数据
-const formValue = ref({
+const formValue = ref<WarehouseData>({
+    id: 0,
     ckmc: '',
     fzr: '',
     lxdh: '',
-    bz: ''
+    bz: '',
+    
 })
 // 定义提示框
 const message = useMessage()
@@ -92,7 +94,7 @@ function handleClearForm() {
   if (!formRef.value) return
   // 重置表单数据
   formValue.value = {
-    id:'',
+    id:0,
     ckmc: '',
     fzr: '',
     lxdh: '',
@@ -120,8 +122,8 @@ async function handleValidateClick() {
         
         const forData=formValue.value
         const response = forData.id
-            ?await apiClient.put(`/warehouses/${forData.id}`, forData)
-            :await apiClient.post('/warehouses',forData);
+            ?await apiClient.put(`/warehouses/${forData.id}`, forData) as ApiResponse<WarehouseData[]>
+            :await apiClient.post('/warehouses',forData) as ApiResponse<WarehouseData[]>
             
         response.code === 200
             ?message.success('操作成功!')
@@ -139,14 +141,16 @@ async function handleValidateClick() {
 // 组件挂载时获取数据
 onMounted(() => {
     //  绑定显示事件
-    emitter.on("wareAddInforShwo",(value?:FormInst)=>{
-        if (value) {
+    //  绑定显示事件
+    emitter.on("wareAddInforShwo",(value: unknown)=>{
+        const warehouseData = value as WarehouseData | undefined
+        if (warehouseData) {
             formValue.value = {
-                id: value.id || '',
-                ckmc: value.ckmc || '',
-                fzr: value.fzr || '',
-                lxdh: value.lxdh || '',
-                bz: value.bz || ''
+                id: warehouseData.id || 0,
+                ckmc: warehouseData.ckmc || '',
+                fzr: warehouseData.fzr || '',
+                lxdh: warehouseData.lxdh || '',
+                bz: warehouseData.bz || ''
             }
         }
         showModal.value = true

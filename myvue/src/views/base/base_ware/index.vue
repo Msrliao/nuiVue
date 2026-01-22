@@ -35,13 +35,12 @@ function addInforShwo () {
         <n-button @click="addInforShwo()">
                 添加仓库
         </n-button>
-    </n-flex>
-    <TableVue />
-    <n-flex >
         <n-button @click="addPlaceShwo()">
                 添加库位
         </n-button>
     </n-flex>
+    <TableVue />
+   
     <n-card :title="selectName.ckmc? `仓库：${selectName.ckmc}` : '未选择仓库'">
         <PlaceTree />
     </n-card>

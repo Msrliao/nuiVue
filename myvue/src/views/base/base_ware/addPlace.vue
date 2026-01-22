@@ -37,11 +37,14 @@
 
 import { ref, onUnmounted, onMounted } from 'vue'
 import emitter from "@/utils/emitter"
-import type { FormInst } from 'naive-ui'
+import type { FormInst,TreeOption } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
 import { useSharedStore } from '@/stores/useBaseWareStore'
 import { storeToRefs } from 'pinia'
+import type { ApiResponse, PositionData } from '@/types';
+
+
 
 // 获取表格选中数据
 const {row: tableSele}=storeToRefs(useSharedStore())
@@ -52,10 +55,8 @@ const showModal = ref(false)
 // 按钮加载
 const butLoading= ref(false)
 // 定义提交数据
-const formValue = ref({
-    warehouse_id: '',
-    position_name: '',
-    parent_id:''
+const formValue = ref<PositionData>({
+    position_name:''
 })
 // 定义提示框
 const message = useMessage()
@@ -74,12 +75,11 @@ function handleClearForm() {
   if (!formRef.value) return
   // 重置表单数据
   formValue.value = {
-    warehouse_id: null,
-    position_name: '',
-    parent_id:null
+    position_name: ''
+ 
   }
   // 清除表单校验状态
-  formRef.value.restoreValidation()
+//   formRef.value.restoreValidation()
 }
 // 新增：取消按钮函数（完善交互）
 function handleCancel() {
@@ -95,8 +95,9 @@ async function handleValidateClick() {
         
         // 校验数据
         await formRef.value.validate()
-        if(formValue.value.id){ //直接添加到仓库下
-            const response = await apiClient.put(`/positions/${formValue.value.id}`, formValue.value)
+
+        if(formValue.value && formValue.value.id ){ //直接添加到仓库下
+            const response = await apiClient.put(`/positions/${formValue.value.id}`, formValue.value) as ApiResponse<PositionData[]>;
             if(response.code === 200){
                 message.success('仓位更新成功')
                 // 关闭弹窗并清空表单
@@ -108,7 +109,8 @@ async function handleValidateClick() {
             }
         }else{
             // 调用API提交数据
-            const response = await apiClient.post('/positions', formValue.value)
+            console.log('formValue',formValue.value)
+            const response = await apiClient.post('/positions', formValue.value) as ApiResponse<PositionData[]>;
             if(response.code === 200){
                 message.success('仓位创建成功')
                 // 关闭弹窗并清空表单
@@ -129,30 +131,31 @@ async function handleValidateClick() {
 onMounted(() => {
     //  绑定显示事件
     emitter.on("indexToAddPlaceShwo",()=>{
-        console.log('tableSele',tableSele)
+   
         if (tableSele.value) {
             formValue.value = {
-                parent_id:null,
-                warehouse_id: tableSele.value.id || '', 
+                warehouse_id: tableSele.value.id || 0, 
                 position_name:''         
             }
         }
         showModal.value = true
     })
-    emitter.on("TreeToUpPlaceShwo",(value: Array)=>{
-        if (value.key){
+    emitter.on("TreeToUpPlaceShwo",(value)=>{
+        const treeOption = value as TreeOption
+        if (treeOption.key){
             formValue.value = {
-                id:value.key,
-                position_name: value.label || '',
+                id:treeOption.key as number,
+                position_name: treeOption.label || '',
             }
         }
         showModal.value = true
     })
-    emitter.on("TreeToAddPlaceShwo",(value: Array)=>{
-        if (value.key){
+    emitter.on("TreeToAddPlaceShwo",(value)=>{
+        const treeOption = value as TreeOption
+        if (treeOption.key){
             formValue.value = {
                 warehouse_id: tableSele.value.id,
-                parent_id: value.key,
+                parent_id: treeOption.key as number,
                 position_name: '',
             }
         }

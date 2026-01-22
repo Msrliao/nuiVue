@@ -8,25 +8,34 @@
   },
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build",
+    "lint": "eslint . --fix --cache"
   },
   "dependencies": {
-    "@vicons/ionicons5": "^0.13.0",
-    "@vicons/utils": "^0.1.4",
     "axios": "^1.13.2",
     "mitt": "^3.0.1",
-    "pg": "^8.16.3",
     "pinia": "^3.0.4",
     "vue": "^3.5.26"
   },
   "devDependencies": {
+    "@tsconfig/node24": "^24.0.3",
+    "@types/node": "^24.10.4",
+    "@vicons/ionicons5": "^0.13.0",
     "@vitejs/plugin-vue": "^6.0.3",
-    "@vue/typescript": "^1.8.20",
+    "@vue/eslint-config-typescript": "^14.6.0",
+    "@vue/tsconfig": "^0.8.1",
+    "eslint": "^9.39.2",
+    "eslint-plugin-vue": "~10.6.2",
+    "jiti": "^2.6.1",
     "naive-ui": "^2.43.2",
-    "typescript": "^5.9.3",
+    "npm-run-all2": "^8.0.4",
+    "typescript": "~5.9.3",
     "vfonts": "^0.0.3",
     "vite": "^7.3.0",
-    "vite-plugin-vue-devtools": "^8.0.5"
+    "vite-plugin-vue-devtools": "^8.0.5",
+    "vue-tsc": "^3.2.2"
   }
 }
