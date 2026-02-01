@@ -9,7 +9,7 @@
     @add="handleAdd"
   >
   
-    <n-tab-pane v-for="panel,key in panels" :name="key" :tab="panel.name">
+    <n-tab-pane v-for="panel,key in panels" :name="key" :tab="panel.name" display-directive="show">
       <component :is="panel.component" />
     </n-tab-pane>
   </n-tabs>

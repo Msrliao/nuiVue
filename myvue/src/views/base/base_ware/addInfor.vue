@@ -54,17 +54,25 @@
 </template>
 <script setup lang="ts">
 
-import { ref, onUnmounted, onMounted } from 'vue'
-import emitter from "@/utils/emitter"
+import { ref, onUnmounted, onMounted, watch } from 'vue'
 import type { TreeSelectOption, FormInst } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
 
+const props = defineProps<{
+  show: boolean
+  editData?: any
+}>()
+
+const emit = defineEmits<{
+  (e: 'close'): void
+  (e: 'refresh'): void
+}>()
 
 // 定义formRef
 const formRef = ref<FormInst | null>(null)
 // 定义遮罩层
-const showModal = ref(false)
+const showModal = ref(props.show)
 // 按钮加载
 const butLoading=ref(false)
 
@@ -101,9 +109,28 @@ function handleClearForm() {
   // 清除表单校验状态
   formRef.value.restoreValidation()
 }
-// 新增：取消按钮函数（完善交互）
+// 监听 show 属性变化
+watch(() => props.show, (newVal) => {
+  showModal.value = newVal
+})
+
+// 监听 editData 属性变化
+watch(() => props.editData, (newVal) => {
+  if (newVal) {
+    formValue.value = {
+      id: newVal.id || '',
+      ckmc: newVal.ckmc || '',
+      fzr: newVal.fzr || '',
+      lxdh: newVal.lxdh || '',
+      bz: newVal.bz || ''
+    }
+  }
+}, { immediate: true })
+
+// 取消按钮函数（完善交互）
 function handleCancel() {
   showModal.value = false
+  emit('close')
   handleClearForm() // 取消时同时清空表单
 }
 
@@ -130,7 +157,7 @@ async function handleValidateClick() {
         // 关闭弹窗并清空表单
         handleCancel()
         // 通知表格组件刷新数据
-        emitter.emit('refreshWarehouseData')
+        emit('refresh')
     } catch (error: any) {
         message.error(error.message || '操作失败！')
     }
@@ -138,23 +165,11 @@ async function handleValidateClick() {
 }
 // 组件挂载时获取数据
 onMounted(() => {
-    //  绑定显示事件
-    emitter.on("wareAddInforShwo",(value?:FormInst)=>{
-        if (value) {
-            formValue.value = {
-                id: value.id || '',
-                ckmc: value.ckmc || '',
-                fzr: value.fzr || '',
-                lxdh: value.lxdh || '',
-                bz: value.bz || ''
-            }
-        }
-        showModal.value = true
-    }) 
+    // 组件挂载时的初始化代码
 })
-//  重要：组件卸载时移除事件监听，防止内存泄漏
+//  重要：组件卸载时清理
 onUnmounted(() => {
-  emitter.off("wareAddInforShwo")
+  // 清理代码
 })
 </script>
 <style scoped>

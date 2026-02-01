@@ -1,5 +1,6 @@
 //import Quote from '@/views/sales/Quote.vue' //引入组件
 import { defineAsyncComponent,markRaw } from 'vue'
+
 //import Purchase from '@/views/Purchase.vue' //引入组件
 
 const componentMap = {
@@ -11,8 +12,8 @@ const componentMap = {
     '配件资料': markRaw(defineAsyncComponent(() => import('@/views/base/base_part/index.vue'))),
     '客户资料': markRaw(defineAsyncComponent(() => import('@/views/base/base_cust/index.vue'))),
     '仓库管理': markRaw(defineAsyncComponent(() => import('@/views/base/base_ware/index.vue'))),
-    '物流资料': markRaw(defineAsyncComponent(() => import('@/views/base/base_ware/index.vue'))),
-    // '员工资料': markRaw(defineAsyncComponent(() => import('@/views/basicInfor/EmployeesInfor.vue'))),
+    '物流资料': markRaw(defineAsyncComponent(() => import('@/views/base/base_logistics/index.vue'))),
+    '员工资料': markRaw(defineAsyncComponent(() => import('@/views/base/base_emp/index.vue'))),
     
     // // purchase 进货管理
     // '采购进货': markRaw(defineAsyncComponent(() => import('@/views/purchase/Purchase.vue'))),

@@ -68,8 +68,18 @@ async function getPositionsByWarehouseId(warehouseId) {
 }
 
 // 创建仓位
+/**
+ * 创建仓位
+ * @param {Object} positionData - 仓位数据
+ * @param {string} positionData.position_name - 仓位名称
+ * @param {string} positionData.parent_id - 父仓位ID
+ * @param {string} positionData.warehouse_id - 仓库ID
+ * @param {string} positionData.description - 仓位描述
+ * @returns {Promise<Object>} - 创建的仓位对象
+ */
 async function createPosition(positionData) {
   const { position_name, parent_id, warehouse_id, description } = positionData;
+  
   const client = await getClient();
   try {
     const result = await client.query(`

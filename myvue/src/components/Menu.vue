@@ -126,7 +126,7 @@ const menuOptions: MenuOption[] = [
           { key: 'report_base_cust', label: '客户资料' },
           { key: 'report_base_ware', label: '仓库管理' },
           { key: 'report_base_log', label: '物流资料' },
-          { key: 'report_base_staff', label: '员工资料' },
+          { key: 'report_base_emp', label: '员工资料' },
         ]
       },
       {

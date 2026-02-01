@@ -8,7 +8,7 @@
       :row-props="rowProps"
       :loading="loadingRef"
       striped
-      :row-key="row => row.id"
+      :row-key="(row: WarehouseData) => row.id"
     />
     <!-- 右键单击组件 -->
     <n-dropdown
@@ -29,41 +29,45 @@ import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import { useMessage, useDialog } from 'naive-ui'
 import { h, nextTick, ref, onMounted, onUnmounted } from 'vue'
 import apiClient from '@/utils/apiClient'
-import emitter from '@/utils/emitter'
-import { useSharedStore } from '@/store/useBaseWareStore'
+import { useSharedStore } from '@/stores/useBaseWareStore'
+import type {WarehouseData, ApiResponse} from '@/types'
 
-// 1. 定义仓库数据接口
-interface WarehouseData {
-  id: number
-  ckmc: string
-  fzr?: string
-  lxdh?: string
-  bz?: string
-  created_at: string
-  updated_at: string
-}
+const emit = defineEmits<{
+  (e: 'edit', data: WarehouseData): void
+}>()
+
+// 定义信息框
+const message = useMessage()
+// 定义对话框
+const dialog = useDialog()
 // 定义表格加载
 const loadingRef = ref(false)
 //2. 定义仓库数据
 const warehouseData = ref<WarehouseData[]>([])
 // 定义默认选中项
 const checkedRowKeys = ref<number[]>([])
+// 定位表格选择的状态管理
+const SharedStore=useSharedStore()
+// 监控状态管理变化
+const unsubscribe = SharedStore.$subscribe((mutation, state) => {
+  // console.log('状态变化了！')  
+  console.log('变化详情：', mutation)  
+  console.log('最新状态：', state)
+})
 
 // 3.初始化数据
 async function fetchWarehouseData() {
   loadingRef.value = true
   try {
     // 获取仓库列表
-    const response = await apiClient.get('/warehouses')
-    if (response.code===200){
-       warehouseData.value = response.data
-       if(warehouseData.value.length>0){
-        checkedRowKeys.value =[response.data[0].id]
-        
-       }
-       
-    }else{
-      message.error(response.message || '获取仓库数据失败')
+    // 响应拦截器已经处理了响应，直接使用结果
+    const warehouseList = await apiClient.get('/warehouses') as WarehouseData[]
+    
+    // 直接使用响应拦截器处理后的数据
+    warehouseData.value = warehouseList
+    if(warehouseList.length>0 && warehouseList[0]){
+      checkedRowKeys.value =[warehouseList[0].id]
+      SharedStore.row = warehouseList[0]
     }
 
   } catch (error: any) {
@@ -121,10 +125,6 @@ const options: DropdownOption[] = [
 ]
 // 定义右键点击的行数据
 const currentRow = ref<WarehouseData | null>(null)
-// 定义信息框
-const message = useMessage()
-// 定义对话框
-const dialog = useDialog()
 // 定义右键组件显示
 const showDropdownRef = ref(false)
 // 定义右键组件弹出坐标
@@ -142,7 +142,7 @@ const y = yRef
 function handleSelect(key: string) {
   if (key === 'edit' && currentRow.value) {
     // 触发编辑事件，传递当前行数据
-    emitter.emit("wareAddInforShwo", currentRow.value)
+    emit("edit", currentRow.value)
     
   } else if (key === 'delete' && currentRow.value) {
     // 显示删除确认对话框
@@ -196,13 +196,9 @@ function rowProps(row: WarehouseData) {
       // console.log('行被点击了:', row)
       
       // 获取当前行数据到pinia
-      useSharedStore.row=row
-
+      SharedStore.row=row
+      // 设置默认选中项
       checkedRowKeys.value=[row.id]
-      // 发送仓库选择事件，通知仓位树形组件刷新
-      emitter.emit('selectWarehouse', row)
-      // 发送行数据事件，可被父组件监听
-      emitter.emit('warehouseRowClick', row)
       
       // 高亮当前选中行
       currentRow.value = row
@@ -215,16 +211,19 @@ function refreshData() {
   fetchWarehouseData()
 }
 
+// 暴露方法给父组件
+defineExpose({
+  refreshData
+})
+
 // 组件挂载时获取数据
 onMounted(() => {
   fetchWarehouseData()
-  // 监听数据刷新事件
-  emitter.on('refreshWarehouseData', refreshData)
 })
 
 // 组件卸载时移除事件监听
 onUnmounted(() => {
-  emitter.off('refreshWarehouseData', refreshData)
+  unsubscribe()
 })
 
 </script>

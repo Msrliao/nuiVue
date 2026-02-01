@@ -2,10 +2,14 @@
   <n-flex>
 
   <n-data-table
+  v-model:checked-row-keys="checkedRowKeys"
     :columns="columns"
-    :data="data"
+    :data="props.data"
     :row-props="rowProps"
+    :loading="props.loading"
     striped
+    :row-key="(row: DKRowData) => row.key"
+    :single-line="true"
   />
   <n-dropdown
     placement="bottom-start"
@@ -26,66 +30,69 @@ import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import { h, nextTick, ref } from 'vue'
 
-
-interface RowData {
+// 定义大库数据接口
+interface DKRowData {
   key: number
-  name: string
-  age: number
-  weight: number; // 体重
-  address: string
+  [key: string]: any
 }
+  // 定义默认选中项
+const checkedRowKeys = ref<number[]>([])
+// 表格选中的数据
+const currentRow = ref<DKRowData | null>(null)
 
+// 接收父组件传递的数据和加载状态
+const props = defineProps<{
+  data: DKRowData[]
+  loading: boolean
+}>()
 
-function createColumns(): DataTableColumns<RowData> {
+// 创建表格列
+function createColumns(): DataTableColumns<DKRowData> {
   return [
-  
     {
-      title: 'Name',
-      key: 'name',
+      type: 'selection',
+      multiple: false,
+    },
+    {
+      title: '序号',
+      key: 'xh',
+      sorter: 'default',
+      render: (row, index) => index + 1
+    },
+    {
+      title: '编码',
+      key: '商品编码',
       sorter: 'default'
     },
     {
-      title: 'Age',
-      key: 'age',
-      sorter: 'default'
-    },
-    {
-      title: 'Address',
-      key: 'address'
+      title: '名称',
+      key: '商品名称'
     },{
-      title:"weight",
-      key:"weight"
+      title:"车型",
+      key:"车型"
+    },{
+      title:"总库存",
+      key:"总库存"
+    },{
+      title:"品牌",
+      key:"品牌"
+    },{
+      title:"批发价",
+      key:"批发价"
+    },{
+      title:"零售价",
+      key:"零售价"
+    },{
+      title:"调拨价",
+      key:"调拨价"
+    },{
+      title:"进价",
+      key:"参考进价"
     }
   ]
 }
 
-function createData(): RowData[] {
-  return [
-    {
-      key: 0,
-      name: 'John Brown',
-      age: 32,
-      weight:50,
-      address: 'New York No. 1 Lake Park'
-    },
-    {
-      key: 1,
-      name: 'Jim Green',
-      age: 42,
-      weight:50,
-      address: 'London No. 1 Lake Park'
-    },
-    {
-      key: 2,
-      name: 'Joe Black',
-      age: 30,
-      weight:50,
-      address: 'Sidney No. 1 Lake Park'
-    }
-  ]
-}
-
-const data = createData()
+// 创建表格列
 const columns = createColumns()
 
 const options: DropdownOption[] = [
@@ -115,7 +122,7 @@ function onClickoutside() {
   showDropdownRef.value = false
 }
 
-function rowProps(row: Song) {
+function rowProps(row: DKRowData) {
   return {
     onContextmenu: (e: MouseEvent) => {
       message.info(JSON.stringify(row, null, 2))
@@ -126,8 +133,16 @@ function rowProps(row: Song) {
         xRef.value = e.clientX
         yRef.value = e.clientY
       })
+    },
+    // 左键点击事件
+    onClick: (e: MouseEvent) => {
+      // 阻止事件冒泡和默认行为
+      e.preventDefault()
+      e.stopPropagation()
+      // 保存当前左键点击的行数据
+      currentRow.value = row
+      checkedRowKeys.value = [row.key]
     }
   }
 }
-
 </script>

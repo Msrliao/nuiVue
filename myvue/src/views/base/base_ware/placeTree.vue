@@ -19,7 +19,7 @@
       :x="xRef"
       :y="yRef"
       @select="handleSelect"
-      @clickoutside="handleClickoutside"
+     
     />
   </n-spin>
 </n-space>
@@ -28,17 +28,35 @@
 <script setup lang="ts">
 
 import type { DropdownOption, TreeOption } from 'naive-ui'
-import {h, ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { useMessage, useDialog } from 'naive-ui'
+
+import {h, ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import apiClient from '@/utils/apiClient'
-import emitter from '@/utils/emitter'
+import { useSharedStore } from '@/stores/useBaseWareStore'
+import { storeToRefs } from 'pinia'
+
+const emit = defineEmits<{
+  (e: 'edit', data: TreeOption): void
+  (e: 'add', data: TreeOption): void
+}>()
+
 
 // 定义树形数据
 const treeData = ref<TreeOption[]>([])
 // 默认展开的节点
 const defaultExpandedKeys = ref<string[]>([])
 // 当前选中的仓库ID
-const selectedWarehouseId = ref<arr | null>(null)
+const {row: tableSelectedData} = storeToRefs(useSharedStore())
+// 加载层
 const show=ref(false)
+const dialog = useDialog()
+const message = useMessage()
+
+// 监听仓库选择变化
+watch(() => tableSelectedData.value, () => {
+  fetchPositionData()
+}, { deep: true })
+
 
 // 将扁平数据转换为树形结构
 function buildTree(nodes: any[], parentId: number | null = null): TreeOption[] {
@@ -52,37 +70,39 @@ function buildTree(nodes: any[], parentId: number | null = null): TreeOption[] {
 }
 
 // 获取仓位数据
-async function fetchPositionData(tableSelectedID:string) {
+async function fetchPositionData() {
   show.value =true
   try {
-    let response
-    if (tableSelectedID) {
+    let positions = []
+    if (tableSelectedData.value.id) {
       // 获取指定仓库的仓位
-      response = await apiClient.get(`/positions/warehouse/${tableSelectedID}`)
-    } 
-    
-    if (response && response.code === 200) {
-      // 构建树形结构
-      treeData.value = buildTree(response.data)
-      // 展开所有一级节点
-      defaultExpandedKeys.value = treeData.value.map(item => item.key)
+      // 响应拦截器已经处理了响应，直接使用结果
+      positions = await apiClient.get(`/positions/warehouse/${tableSelectedData.value.id}`)
     }
+    
+    // 构建树形结构
+    treeData.value = buildTree(positions)
+    // 展开所有一级节点
+    defaultExpandedKeys.value = treeData.value.map(item => item.key)
   } catch (error) {
     console.error('获取仓位数据失败:', error)
   }
   show.value =false
 }
 const showDropdownRef = ref(false)
-const optionsVal= ref([])
+const optionsVal= ref<TreeOption>(null)
 const xRef = ref(0)
 const yRef = ref(0)
 // 点击事件
 function nodeProps({ option }: { option: TreeOption }) {
   return {
+    // 左键点击
     onClick() {
       
     },
+    // 右键点击
     onContextmenu(e: MouseEvent): void {
+      console.log('右键点击:', option)
       optionsVal.value = option
       e.preventDefault()
       showDropdownRef.value = false
@@ -91,16 +111,16 @@ function nodeProps({ option }: { option: TreeOption }) {
         xRef.value = e.clientX
         yRef.value = e.clientY
       })      
-      // message.info(JSON.stringify(row, null, 2))
-      // e.preventDefault()
-     
       
-      // emitter.emit('showAddPlaceModal', option.value)
     }
   }
 }
 // 右键单击选项表头
 const options: DropdownOption[] = [
+  {
+    label: '添加',
+    key: 'add'
+  },
   {
     label: '编辑',
     key: 'edit'
@@ -113,25 +133,28 @@ const options: DropdownOption[] = [
 // 右键菜单选中事件
 function handleSelect(key: string) {
   
-  if (key === 'edit' && optionsVal.value) {
-    console.log('optionsVal',optionsVal.value)
-    // 触发编辑事件，传递当前行数据
-    emitter.emit("showAddPlaceModal", optionsVal.value,selectedWarehouseId.value)
+  if (key === 'add' && optionsVal.value) {
+    // 触发添加事件，传递当前节点数据
+    emit("add", optionsVal.value)
     
-  } else if (key === 'delete' && currentRow.value) {
+  } else if (key === 'edit' && optionsVal.value) {
+    // 触发编辑事件，传递当前节点数据
+    emit("edit", optionsVal.value)
+    
+  } else if (key === 'delete' && optionsVal.value) {
     // 显示删除确认对话框
     dialog.warning({
       title: '确认删除',
-      content: `确定要删除仓库"${currentRow.value.ckmc}"吗？此操作不可恢复。`,
+      content: `确定要删除仓库"${optionsVal.value.label}"吗？此操作不可恢复。`,
       positiveText: '删除',
       negativeText: '取消',
       onPositiveClick: async () => {
         try {
           // 调用API删除仓库
-          await apiClient.delete(`/warehouses/${currentRow.value?.id}`)
+          await apiClient.delete(`/positions/${optionsVal.value?.key}`)
           message.success('仓库删除成功')
           // 刷新表格数据
-          refreshData()
+          fetchPositionData()
         } catch (error: any) {
           message.error(error.message || '仓库删除失败')
         }
@@ -142,28 +165,25 @@ function handleSelect(key: string) {
 }
 
 // 监听仓库选择事件
-function handleWarehouseSelect(warehouse:arr) {
+function handleWarehouseSelect() {
   
-  selectedWarehouseId.value = warehouse
   fetchPositionData()
 }
 
 // 组件挂载时获取数据
 onMounted(() => {
-
-  // 监听数据刷新事件
-  emitter.on('refreshPositionData', fetchPositionData)
-  // 监听仓库选择事件
-  emitter.on('selectWarehouse', handleWarehouseSelect)
-  // emitter.on('warehouseRowClick', handleWarehouseSelect)
-  
+  // 初始获取数据
+  fetchPositionData()
 })
 
-// 组件卸载时移除事件监听
+// 组件卸载时清理
 onUnmounted(() => {
-  emitter.off('refreshPositionData', fetchPositionData)
-  emitter.off('selectWarehouse', handleWarehouseSelect)
-  // emitter.off('warehouseRowClick', handleWarehouseSelect)
+  // 清理代码
+})
+
+// 暴露方法给父组件
+defineExpose({
+  fetchPositionData
 })
 </script>
 
