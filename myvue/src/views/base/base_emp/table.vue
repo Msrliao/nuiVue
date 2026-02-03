@@ -36,27 +36,26 @@ import apiClient from '@/utils/apiClient'
 interface RowData {
   id: number
   xm: string; // 姓名
-  xmjp:string; // 姓名简拼
+  xmjp: string; // 姓名拼音
   xb: string; // 性别
   csrq: string; // 出生日期
-  mz: string; // 联系人
+  mz: string; // 民族
   lxdh: string; // 联系电话
-  sfz: string; // 座机电话
-  qtlxfs: string; // 其他联系方式
-  lxdz: string; // 联系地址
-  yhzhm: string; // 银行账户名
-  yhzh: string; // 银行账号
-  ssyh: string; // 所属银行
-  khlx: string[]; // 客户类型
-  jyfw: string[]; // 经营范围
-  ssqd: string[]; // 所属地区
-  fkfs: string[]; // 付款方式
-  mrwl: string[]; // 默认物流
-  mryhfs: string[]; // 默认运货方式
+  idcard: string; // 身份证号
+  yx: string; // 邮箱
+  zw: string; // 职位
+  bm: string; // 部门
+  gzjb: string; // 工资级别
+  rzrq: string; // 入职日期
+  syq: string; // 试用期
+  htsjzrq: string; // 合同起始日期
+  htsjzzrq: string; // 合同终止日期
+  emergencyContact: string; // 紧急联系人
+  emergencyContactPhone: string; // 紧急联系人电话
   bz: string; // 备注
+  zt: string; // 状态
   created_at?: string; // 创建时间
   updated_at?: string; // 更新时间
-  key?: number; // 行标识
 }
 
 // 接收父组件传递的数据和加载状态
