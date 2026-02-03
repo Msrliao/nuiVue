@@ -61,7 +61,9 @@ async function fetchWarehouseData() {
   try {
     // 获取仓库列表
     // 响应拦截器已经处理了响应，直接使用结果
-    const warehouseList = await apiClient.get('/v1/warehouses') as WarehouseData[]
+    const response = await apiClient.get('/v1/warehouses')
+    // 确保 warehouseList 是数组（容错处理）
+    const warehouseList = Array.isArray(response) ? response : (response?.data || [])
     
     // 直接使用响应拦截器处理后的数据
     warehouseData.value = warehouseList
@@ -72,6 +74,7 @@ async function fetchWarehouseData() {
 
   } catch (error: any) {
     message.error(error.message || '获取仓库数据失败')
+    warehouseData.value = []
   }
   loadingRef.value = false
 }

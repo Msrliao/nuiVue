@@ -32,16 +32,14 @@ function errorResponse(res, type, title, status, detail, instance, errors = []) 
 // ========== 输入验证中间件 ==========
 
 function validateWarehouseData(req, res, next) {
-  const { ckmc, ckjp } = req.body;
+  const { ckmc } = req.body;
   const errors = [];
   
   if (!ckmc || ckmc.trim() === '') {
     errors.push({ field: 'ckmc', message: '仓库名称不能为空' });
   }
   
-  if (!ckjp || ckjp.trim() === '') {
-    errors.push({ field: 'ckjp', message: '仓库简拼不能为空' });
-  }
+  // 移除 ckjp 必填验证，简拼可由前端生成或在后端根据名称自动生成
   
   if (errors.length > 0) {
     return errorResponse(

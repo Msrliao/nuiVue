@@ -32,18 +32,28 @@ function errorResponse(res, type, title, status, detail, instance, errors = []) 
 // ========== 输入验证中间件 ==========
 
 function validatePositionData(req, res, next) {
-  const { cwmc, ckid } = req.body;
+  console.log('[DEBUG] validatePositionData called');
+  console.log('[DEBUG] req.body:', req.body);
+  
+  // 支持前端字段名 position_name 和 warehouse_id，以及旧字段名 cwmc 和 ckid
+  const positionName = req.body.position_name || req.body.cwmc;
+  const warehouseId = req.body.warehouse_id || req.body.ckid;
+  
+  console.log('[DEBUG] positionName:', positionName);
+  console.log('[DEBUG] warehouseId:', warehouseId);
+  
   const errors = [];
   
-  if (!cwmc || cwmc.trim() === '') {
-    errors.push({ field: 'cwmc', message: '仓位名称不能为空' });
+  if (!positionName || positionName.trim() === '') {
+    errors.push({ field: 'position_name', message: '仓位名称不能为空' });
   }
   
-  if (!ckid) {
-    errors.push({ field: 'ckid', message: '仓库ID不能为空' });
+  if (!warehouseId) {
+    errors.push({ field: 'warehouse_id', message: '仓库ID不能为空' });
   }
   
   if (errors.length > 0) {
+    console.log('[DEBUG] Validation errors:', errors);
     return errorResponse(
       res,
       'https://api.example.com/errors/validation-error',
@@ -99,9 +109,39 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * GET /api/v1/positions/warehouse/:id
+ * 注意：这个路由必须放在 '/:id' 路由之前，否则会被误匹配
+ */
+router.get('/warehouse/:id', (req, res, next) => {
+  console.log('[DEBUG] Warehouse route hit, params:', req.params, 'url:', req.url);
+  next();
+}, validateId, async (req, res) => {
+  console.log('[DEBUG] Warehouse route passed validation, id:', req.params.id);
+  try {
+    const positions = await positionService.getPositionsByWarehouseId(req.params.id);
+    console.log('[DEBUG] Positions found:', positions.length);
+    successResponse(res, positions);
+  } catch (error) {
+    console.error('获取仓库仓位列表失败:', error);
+    errorResponse(
+      res,
+      'https://api.example.com/errors/internal-error',
+      'Internal Server Error',
+      500,
+      '服务器内部错误',
+      req.originalUrl
+    );
+  }
+});
+
+/**
  * GET /api/v1/positions/:id
  */
-router.get('/:id', validateId, async (req, res) => {
+router.get('/:id', (req, res, next) => {
+  console.log('[DEBUG] Generic ID route hit, params:', req.params, 'url:', req.url);
+  next();
+}, validateId, async (req, res) => {
+  console.log('[DEBUG] Generic ID route passed validation, id:', req.params.id);
   try {
     const position = await positionService.getPositionById(req.params.id);
     
@@ -119,26 +159,6 @@ router.get('/:id', validateId, async (req, res) => {
     successResponse(res, position);
   } catch (error) {
     console.error('获取仓位详情失败:', error);
-    errorResponse(
-      res,
-      'https://api.example.com/errors/internal-error',
-      'Internal Server Error',
-      500,
-      '服务器内部错误',
-      req.originalUrl
-    );
-  }
-});
-
-/**
- * GET /api/v1/positions/warehouse/:warehouseId
- */
-router.get('/warehouse/:warehouseId', validateId, async (req, res) => {
-  try {
-    const positions = await positionService.getPositionsByWarehouseId(req.params.warehouseId);
-    successResponse(res, positions);
-  } catch (error) {
-    console.error('获取仓库仓位列表失败:', error);
     errorResponse(
       res,
       'https://api.example.com/errors/internal-error',

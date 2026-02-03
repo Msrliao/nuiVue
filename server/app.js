@@ -619,7 +619,9 @@ app.get('/api/customers/search', async (req, res) => {
 // 创建员工资料
 app.post('/api/employees', async (req, res) => {
   try {
+    console.log('employee',req.body)
     const employee = await employeeService.createEmployee(req.body);
+    
     successResponse(res, employee, '创建员工资料成功', 201);
   } catch (error) {
     console.error('创建员工资料失败:', error);

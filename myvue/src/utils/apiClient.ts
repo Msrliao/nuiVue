@@ -28,8 +28,8 @@ apiClient.interceptors.response.use(
       return null;
     }
     
-    // 后端返回的数据格式是 { code: 200, message: '操作成功', data: [...], timestamp: 1234567890 }
-    if (response.data && typeof response.data === 'object') {
+    // 后端返回的数据格式是 { data: [...] } 或 { code: 200, message: '操作成功', data: [...], timestamp: 1234567890 }
+    if (response.data && typeof response.data === 'object' && 'data' in response.data) {
       // 如果后端返回的是包装对象，返回 data 字段
       return response.data.data;
     }
@@ -39,13 +39,15 @@ apiClient.interceptors.response.use(
   (error) => {
     // 处理错误响应
     if (error.response && error.response.data) {
-      // 如果后端返回的是包装错误对象
+      // 如果后端返回的是包装错误对象（RFC 7807 Problem Details 格式）
       const errorData = error.response.data;
-      console.error('API Error:', errorData.message, errorData.error);
+      const errorMessage = errorData.detail || errorData.message || errorData.title || '请求失败';
+      console.error('API Error:', errorMessage, errorData);
       return Promise.reject({
-        message: errorData.message,
-        error: errorData.error,
-        code: errorData.code
+        message: errorMessage,
+        error: errorData.title || errorData.error,
+        code: errorData.status || errorData.code || error.response.status,
+        data: errorData
       });
     }
     console.error('API Error:', error);

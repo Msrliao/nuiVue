@@ -14,6 +14,7 @@ function timestampToDate(value) {
 
 // 创建员工资料（已移除 gh 和 zt 字段）
 async function createEmployee(employee) {
+  // gg 
   const client = await getClient();
   try {
     // 将前端字段名映射到数据库字段名，并转换日期格式
@@ -39,9 +40,9 @@ async function createEmployee(employee) {
     
     const result = await client.query(
       `INSERT INTO employee_info (xm, xb, csrq, mz, lxdh, idcard, yx, zw, bm, gzjb, rzrq, syq, htsjzrq, htsjzzrq, emergencyContact, emergencyContactPhone, bz, xmjp)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,$18)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
        RETURNING *`,
-      [xm, xb, csrq, mz, lxdh, idcard, yx, zw, bm, gzjb, rzrq, syq, htsjzrq, htsjzzrq, emergencyContact, emergencyContactPhone, bz,xmjp]
+      [xm, xb, csrq, mz, lxdh, idcard, yx, zw, bm, gzjb, rzrq, syq, htsjzrq, htsjzzrq, emergencyContact, emergencyContactPhone, bz, xmjp]
     );
     return result.rows[0];
   } finally {
@@ -58,6 +59,7 @@ async function getAllEmployees() {
     return result.rows.map(row => ({
       id: row.id,
       xm: row.xm,
+      xmjp: row.xmjp,
       xb: row.xb,
       csrq: row.csrq,
       mz: row.mz,
@@ -94,6 +96,7 @@ async function getEmployeeById(id) {
     return {
       id: row.id,
       xm: row.xm,
+      xmjp: row.xmjp,
       xb: row.xb,
       csrq: row.csrq,
       mz: row.mz,
@@ -147,9 +150,9 @@ async function updateEmployee(id, employee) {
     const result = await client.query(
       `UPDATE employee_info
        SET xm = $1, xb = $2, csrq = $3, mz = $4, lxdh = $5, idcard = $6, yx = $7, zw = $8, bm = $9, gzjb = $10, rzrq = $11, syq = $12, htsjzrq = $13, htsjzzrq = $14, emergencyContact = $15, emergencyContactPhone = $16, bz = $17, xmjp = $18
-       WHERE id = $18
+       WHERE id = $19
        RETURNING *`,
-      [xm, xb, csrq, mz, lxdh, idcard, yx, zw, bm, gzjb, rzrq, syq, htsjzrq, htsjzzrq, emergencyContact, emergencyContactPhone, bz, id,xmjp]
+      [xm, xb, csrq, mz, lxdh, idcard, yx, zw, bm, gzjb, rzrq, syq, htsjzrq, htsjzzrq, emergencyContact, emergencyContactPhone, bz, xmjp, id]
     );
     return result.rows[0] || null;
   } finally {
@@ -182,6 +185,7 @@ async function searchEmployees(keyword) {
     return result.rows.map(row => ({
       id: row.id,
       xm: row.xm,
+      xmjp: row.xmjp,
       xb: row.xb,
       csrq: row.csrq,
       mz: row.mz,
@@ -247,14 +251,12 @@ async function getEmployeesByParams(params) {
     // 添加排序和限制
     sql += ' ORDER BY xm LIMIT 20';
     
-    console.log('执行SQL:', sql);
-    console.log('参数:', values);
-    
     const result = await client.query(sql, values);
     // 将数据库字段名映射为前端字段名
     return result.rows.map(row => ({
       id: row.id,
       xm: row.xm,
+      xmjp: row.xmjp,
       xb: row.xb,
       csrq: row.csrq,
       mz: row.mz,

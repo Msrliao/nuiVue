@@ -77,7 +77,9 @@ async function fetchPositionData() {
     if (tableSelectedData.value.id) {
       // 获取指定仓库的仓位
       // 响应拦截器已经处理了响应，直接使用结果
-      positions = await apiClient.get(`/v1/positions/warehouse/${tableSelectedData.value.id}`)
+      const response = await apiClient.get(`/v1/positions/warehouse/${tableSelectedData.value.id}`)
+      // 确保 positions 是数组（容错处理）
+      positions = Array.isArray(response) ? response : (response?.data || [])
     }
     
     // 构建树形结构
@@ -86,6 +88,9 @@ async function fetchPositionData() {
     defaultExpandedKeys.value = treeData.value.map(item => item.key)
   } catch (error) {
     console.error('获取仓位数据失败:', error)
+    // 清空树形数据避免显示旧数据
+    treeData.value = []
+    defaultExpandedKeys.value = []
   }
   show.value =false
 }

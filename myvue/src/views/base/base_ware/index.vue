@@ -30,8 +30,12 @@ const placeTreeRef = ref<any>(null)
 
 // 触发添加库位弹窗事件
 function addPlaceShwo () {
-  if (selectName.value) {
-    // 显示添加窗口
+  if (selectName.value && selectName.value.id) {
+    // 显示添加窗口，并传递当前选中的仓库作为 addData
+    addPlaceData.value = { 
+      key: null,  // 没有父节点（顶级仓位）
+      warehouse_id: selectName.value.id  // 传递仓库ID
+    }
     showAddPlaceModal.value = true
   } else {
     message.error('请先选择要添加到哪个库房')

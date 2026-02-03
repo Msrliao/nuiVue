@@ -124,10 +124,12 @@ watch(() => props.editData, (newVal) => {
 // 监听 addData 属性变化
 watch(() => props.addData, (newVal) => {
   if (newVal) {
+    // 优先使用传递的 warehouse_id，如果没有则从 tableSele 获取
+    const warehouseId = newVal.warehouse_id || tableSele.value?.id || null
     formValue.value = {
-      warehouse_id: tableSele.value.id,
+      warehouse_id: warehouseId,
       position_name: '',
-      parent_id: newVal.key,
+      parent_id: newVal.key || null,
       description: ''
     }
   }
@@ -150,6 +152,19 @@ async function handleValidateClick() {
         // 校验数据
         await formRef.value.validate()
         console.log('校验通过:', formValue.value)
+        
+        // 确保 warehouse_id 已设置（从选中的仓库获取）
+        if (!formValue.value.warehouse_id && tableSele.value?.id) {
+            formValue.value.warehouse_id = tableSele.value.id
+        }
+        
+        // 检查 warehouse_id 是否仍然为空
+        if (!formValue.value.warehouse_id) {
+            message.error('请先选择仓库')
+            butLoading.value = false
+            return
+        }
+        
         if(formValue.value.id){ // 更新仓位
             // 响应拦截器已经处理了响应，直接使用结果
             const response: ApiResponse<PositionFormData> = await apiClient.put(`/v1/positions/${formValue.value.id}`, formValue.value)
