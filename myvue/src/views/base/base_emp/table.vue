@@ -6,7 +6,7 @@
       :row-props="rowProps"
       :loading="props.loading"
       striped
-      :row-key="(row: RowData) => row.id"
+      :row-key="(row: empData) => row.id"
       :max-height="maxHeight"
       :scroll-x="scrollX"
       virtual-scroll
@@ -32,46 +32,23 @@ import { h, nextTick, ref, computed } from 'vue'
 import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import { useMessage, useDialog } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
+import type {empData} from '@/types'
 
-interface RowData {
-  id: number
-  xm: string; // 姓名
-  xmjp: string; // 姓名拼音
-  xb: string; // 性别
-  csrq: string; // 出生日期
-  mz: string; // 民族
-  lxdh: string; // 联系电话
-  idcard: string; // 身份证号
-  yx: string; // 邮箱
-  zw: string; // 职位
-  bm: string; // 部门
-  gzjb: string; // 工资级别
-  rzrq: string; // 入职日期
-  syq: string; // 试用期
-  htsjzrq: string; // 合同起始日期
-  htsjzzrq: string; // 合同终止日期
-  emergencyContact: string; // 紧急联系人
-  emergencyContactPhone: string; // 紧急联系人电话
-  bz: string; // 备注
-  zt: string; // 状态
-  created_at?: string; // 创建时间
-  updated_at?: string; // 更新时间
-}
 
 // 接收父组件传递的数据和加载状态
 const props = defineProps<{
-  data: RowData[]
+  data: empData[]
   loading: boolean
 }>()
 
 // 定义事件
 const emit = defineEmits<{
   (e: 'refresh'): void
-  (e: 'edit', data: RowData): void
+  (e: 'edit', data: empData): void
 }>()
 
 // 定义右键点击的行数据
-const currentRow = ref<RowData | null>(null)
+const currentRow = ref<empData | null>(null)
 
 // 时间格式化函数
 function formatDate(dateString: string | undefined): string {
@@ -81,7 +58,7 @@ function formatDate(dateString: string | undefined): string {
   return date.toISOString().split('T')[0];
 }
 // 定义表头
-function createColumns(): DataTableColumns<RowData> {
+function createColumns(): DataTableColumns<empData> {
   return [
     {
       title: '序号',
@@ -252,7 +229,7 @@ function onClickoutside() {
   currentRow.value = null // 点击外部时清空当前行
 }
 
-function rowProps(row: RowData) {
+function rowProps(row: empData) {
   return {
     onContextmenu: (e: MouseEvent) => {
       // 保存当前右键点击的行数据

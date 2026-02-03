@@ -36,7 +36,7 @@ export interface ApiResponse<T> {
   data: T;
   timestamp?: number;
 }
-export interface RowData {
+export interface custData {
   id: number
   khjc: string; // 客户简称
   khjp: string; // 客户简拼
@@ -59,4 +59,28 @@ export interface RowData {
   created_at?: string; // 创建时间
   updated_at?: string; // 更新时间
   key?: number; // 行标识
+}
+export interface empData {
+  id: number
+  xm: string; // 姓名
+  xmjp: string; // 姓名拼音
+  xb: string; // 性别
+  csrq: string; // 出生日期
+  mz: string; // 民族
+  lxdh: string; // 联系电话
+  idcard: string; // 身份证号
+  yx: string; // 邮箱
+  zw: string; // 职位
+  bm: string; // 部门
+  gzjb: string; // 工资级别
+  rzrq: string; // 入职日期
+  syq: string; // 试用期
+  htsjzrq: string; // 合同起始日期
+  htsjzzrq: string; // 合同终止日期
+  emergencyContact: string; // 紧急联系人
+  emergencyContactPhone: string; // 紧急联系人电话
+  bz: string; // 备注
+  zt: string; // 状态
+  created_at?: string; // 创建时间
+  updated_at?: string; // 更新时间
 }

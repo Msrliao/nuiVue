@@ -7,7 +7,7 @@
     :row-props="rowProps"
     :loading="props.loading"
     striped
-    :row-key="(row: RowData) => row.id"
+    :row-key="(row: custData) => row.id"
   />
   <n-dropdown
     placement="bottom-start"
@@ -28,26 +28,26 @@ import { h, nextTick, ref } from 'vue'
 import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import { useMessage, useDialog } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
-import type {RowData} from '@/types'
+import type {custData} from '@/types'
 
 
 
 // 接收父组件传递的数据和加载状态
 const props = defineProps<{
-  data: RowData[]
+  data: custData[]
   loading: boolean
 }>()
 
 // 定义事件
 const emit = defineEmits<{
   (e: 'refresh'): void
-  (e: 'edit', data: RowData): void
+  (e: 'edit', data: custData): void
 }>()
 
 // 定义右键点击的行数据
-const currentRow = ref<RowData | null>(null)
+const currentRow = ref<custData | null>(null)
 
-function createColumns(): DataTableColumns<RowData> {
+function createColumns(): DataTableColumns<custData> {
   return [
     {
       title: '客户简称',
@@ -200,7 +200,7 @@ function onClickoutside() {
   currentRow.value = null // 点击外部时清空当前行
 }
 
-function rowProps(row: RowData) {
+function rowProps(row: custData) {
   return {
     onContextmenu: (e: MouseEvent) => {
       // 保存当前右键点击的行数据
