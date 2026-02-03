@@ -17,19 +17,20 @@
             >
                 <n-grid cols="1 s:1 m:1 l:1 xl:1 2xl:1" responsive="screen">
                     <n-form-item-gi  label="仓库名称:" path="ckmc">
-                        <n-input v-model:value="formValue.ckmc" placeholder="请输入仓库名称" />
+                        <n-input v-model:value="formValue.ckmc" placeholder="请输入仓库名称" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="负责人:" path="fzr">
-                        <n-input v-model:value="formValue.fzr" placeholder="请输入负责人" />
+                        <n-input v-model:value="formValue.fzr" placeholder="请输入负责人" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="联系电话:" path="lxdh">
-                        <n-input v-model:value="formValue.lxdh" placeholder="请输入联系电话" />
+                        <n-input v-model:value="formValue.lxdh" placeholder="请输入联系电话" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  :span="24" label="备注:"  path="bz" style="width:100%">
                         <n-input
                             v-model:value="formValue.bz"
                             placeholder="请输入备注"
                             type="textarea"
+                            clearable
                             :autosize="{
                                 minRows: 2,
                                 maxRows: 3,
@@ -147,8 +148,8 @@ async function handleValidateClick() {
         
         const forData=formValue.value
         const response = forData.id
-            ?await apiClient.put(`/warehouses/${forData.id}`, forData)
-            :await apiClient.post('/warehouses',forData);
+            ?await apiClient.put(`/v1/warehouses/${forData.id}`, forData)
+            :await apiClient.post('/v1/warehouses',forData);
             
         response.code === 200
             ?message.success('操作成功!')

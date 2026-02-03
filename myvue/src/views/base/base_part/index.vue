@@ -46,7 +46,7 @@ function addInforShwo () {
 async function fetchPartInfoData(params: any) {
   partLoading.value = true
   try {
-    const response = await apiClient.get('/part-info', { params }) as any
+    const response = await apiClient.get('/v1/parts', { params }) as any
     partInfoData.value = response || []
   } catch (error: any) {
     console.error('获取配件数据失败:', error)
@@ -115,16 +115,16 @@ function handleEdit(data: PartInfoData) {
     
     <n-flex >
         <n-form-item label="配件编码:" >
-            <n-input v-model:value="formValue.bm" placeholder="请输入配件编码"/>
+            <n-input v-model:value="formValue.bm" placeholder="请输入配件编码" clearable/>
         </n-form-item>
         <n-form-item label="配件车型:">
-            <n-input v-model:value="formValue.cx" placeholder="请输入配件车型" />
+            <n-input v-model:value="formValue.cx" placeholder="请输入配件车型" clearable />
         </n-form-item>
         <n-form-item label="配件名称:" >
-            <n-input v-model:value="formValue.mc" placeholder="请输入配件名称"/>
+            <n-input v-model:value="formValue.mc" placeholder="请输入配件名称" clearable/>
         </n-form-item>
         <n-form-item label="配件规格:" >
-            <n-input v-model:value="formValue.gg" placeholder="请输入配件规格"/>
+            <n-input v-model:value="formValue.gg" placeholder="请输入配件规格" clearable/>
         </n-form-item>
            
     </n-flex>

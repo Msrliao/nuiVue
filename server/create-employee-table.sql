@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS employee_info (
     id SERIAL PRIMARY KEY,
     gh VARCHAR(50) NOT NULL COMMENT '工号',
     xm VARCHAR(100) NOT NULL COMMENT '姓名',
+    xmjp VARCHAR(50) COMMENT '姓名简拼',
     xb VARCHAR(10) COMMENT '性别',
     csrq DATE COMMENT '出生日期',
     mz VARCHAR(20) COMMENT '民族',
@@ -27,11 +28,12 @@ CREATE TABLE IF NOT EXISTS employee_info (
 -- 创建索引
 CREATE INDEX IF NOT EXISTS idx_employee_gh ON employee_info(gh);
 CREATE INDEX IF NOT EXISTS idx_employee_xm ON employee_info(xm);
+CREATE INDEX IF NOT EXISTS idx_employee_xmjp ON employee_info(xmjp);
 CREATE INDEX IF NOT EXISTS idx_employee_bm ON employee_info(bm);
 CREATE INDEX IF NOT EXISTS idx_employee_zw ON employee_info(zw);
 
 -- 插入示例数据
-INSERT INTO employee_info (gh, xm, xb, csrq, mz, lxdh, idcard, yx, zw, bm, gzjb, rzrq, syq, htsjzrq, htsjzzrq, emergencyContact, emergencyContactPhone, bz, zt) VALUES
-('EMP001', '张三', '男', '1990-01-01', '汉族', '13800138001', '110101199001011234', 'zhangsan@example.com', '工程师', '技术部', 'A1', '2020-01-01', '3个月', '2020-01-01', '2023-01-01', '张父', '13800138000', '无', '在职'),
-('EMP002', '李四', '女', '1992-02-02', '汉族', '13900139002', '110101199202022345', 'lisi@example.com', '设计师', '设计部', 'A2', '2020-02-02', '3个月', '2020-02-02', '2023-02-02', '李母', '13900139000', '无', '在职'),
-('EMP003', '王五', '男', '1988-03-03', '汉族', '13700137003', '110101198803033456', 'wangwu@example.com', '经理', '销售部', 'B1', '2019-03-03', '6个月', '2019-03-03', '2024-03-03', '王妻', '13700137000', '无', '在职');
+INSERT INTO employee_info (gh, xm, xmjp, xb, csrq, mz, lxdh, idcard, yx, zw, bm, gzjb, rzrq, syq, htsjzrq, htsjzzrq, emergencyContact, emergencyContactPhone, bz, zt) VALUES
+('EMP001', '张三', 'zs', '男', '1990-01-01', '汉族', '13800138001', '110101199001011234', 'zhangsan@example.com', '工程师', '技术部', 'A1', '2020-01-01', '3个月', '2020-01-01', '2023-01-01', '张父', '13800138000', '无', '在职'),
+('EMP002', '李四', 'ls', '女', '1992-02-02', '汉族', '13900139002', '110101199202022345', 'lisi@example.com', '设计师', '设计部', 'A2', '2020-02-02', '3个月', '2020-02-02', '2023-02-02', '李母', '13900139000', '无', '在职'),
+('EMP003', '王五', 'ww', '男', '1988-03-03', '汉族', '13700137003', '110101198803033456', 'wangwu@example.com', '经理', '销售部', 'B1', '2019-03-03', '6个月', '2019-03-03', '2024-03-03', '王妻', '13700137000', '无', '在职');

@@ -61,7 +61,7 @@ async function fetchWarehouseData() {
   try {
     // 获取仓库列表
     // 响应拦截器已经处理了响应，直接使用结果
-    const warehouseList = await apiClient.get('/warehouses') as WarehouseData[]
+    const warehouseList = await apiClient.get('/v1/warehouses') as WarehouseData[]
     
     // 直接使用响应拦截器处理后的数据
     warehouseData.value = warehouseList
@@ -154,7 +154,7 @@ function handleSelect(key: string) {
       onPositiveClick: async () => {
         try {
           // 调用API删除仓库
-          await apiClient.delete(`/warehouses/${currentRow.value?.id}`)
+          await apiClient.delete(`/v1/warehouses/${currentRow.value?.id}`)
           message.success('仓库删除成功')
           // 刷新表格数据
           refreshData()

@@ -17,7 +17,7 @@
         >
             <n-grid cols="1 s:1 m:2 l:2 xl:2 2xl:2" responsive="screen">
                 <n-form-item-gi  label="姓名:" path="xm">
-                    <n-input v-model:value="formValue.xm" placeholder="请输入姓名" />  
+                    <n-input v-model:value="formValue.xm" placeholder="请输入姓名" clearable />  
                 </n-form-item-gi >
                 <n-form-item-gi  label="性别:" path="xb">
                     <n-select
@@ -34,16 +34,16 @@
                     />
                 </n-form-item-gi >
                 <n-form-item-gi  label="民族:" path="mz">
-                    <n-input v-model:value="formValue.mz" placeholder="请输入民族" />   
+                    <n-input v-model:value="formValue.mz" placeholder="请输入民族" clearable />   
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系电话:" path="lxdh">
-                    <n-input v-model:value="formValue.lxdh" placeholder="请输入联系电话" />  
+                    <n-input v-model:value="formValue.lxdh" placeholder="请输入联系电话" clearable />  
                 </n-form-item-gi >
                 <n-form-item-gi  label="身份证号:" path="idcard">
-                    <n-input v-model:value="formValue.idcard" placeholder="请输入身份证号" />  
+                    <n-input v-model:value="formValue.idcard" placeholder="请输入身份证号" clearable />  
                 </n-form-item-gi >
                 <n-form-item-gi  label="邮箱:" path="yx">
-                    <n-input v-model:value="formValue.yx" placeholder="请输入邮箱" />  
+                    <n-input v-model:value="formValue.yx" placeholder="请输入邮箱" clearable />  
                 </n-form-item-gi >
                 <n-form-item-gi  label="职位:" path="zw">
                     <n-select
@@ -64,7 +64,7 @@
                     />
                 </n-form-item-gi >
                 <n-form-item-gi  label="工资级别:" path="gzjb">
-                    <n-input v-model:value="formValue.gzjb" placeholder="工资级别" />  
+                    <n-input v-model:value="formValue.gzjb" placeholder="工资级别" clearable />  
                 </n-form-item-gi >
                 <n-form-item-gi  label="入职日期:" path="rzrq">
                     <n-date-picker
@@ -74,38 +74,40 @@
                     />
                 </n-form-item-gi >
                 <n-form-item-gi  label="试用期:" path="syq">
-                    <n-input v-model:value="formValue.syq" placeholder="请输入试用期" />  
+                    <n-input v-model:value="formValue.syq" placeholder="请输入试用期" clearable />  
                 </n-form-item-gi >
-                <n-form-item-gi  label="合同起始日期:" path="htsjzrq">
+                <n-form-item-gi  label="合同起始日期:" path="htqsrq">
                     <n-date-picker
-                        v-model:value="formValue.htsjzrq"
+                        v-model:value="formValue.htqsrq"
                         type="date"
                         placeholder="请选择合同起始日期"
                     />
                 </n-form-item-gi >
-                <n-form-item-gi  label="合同终止日期:" path="htsjzzrq">
+                <n-form-item-gi  label="合同终止日期:" path="htzzrq">
                     <n-date-picker
-                        v-model:value="formValue.htsjzzrq"
+                        v-model:value="formValue.htzzrq"
                         type="date"
                         placeholder="请选择合同终止日期"  
                     />
                 </n-form-item-gi >
-                <n-form-item-gi  label="紧急联系人:" path="emergencyContact">
-                    <n-input v-model:value="formValue.emergencyContact" placeholder="请输入紧急联系人" />  
+                <n-form-item-gi  label="紧急联系人:" path="jjlxr">
+                    <n-input v-model:value="formValue.jjlxr" placeholder="请输入紧急联系人" clearable />  
                 </n-form-item-gi >
-                <n-form-item-gi  label="紧急联系人电话:" path="emergencyContactPhone">
-                    <n-input v-model:value="formValue.emergencyContactPhone" placeholder="请输入紧急联系人电话" />    
+                <n-form-item-gi  label="紧急联系人电话:" path="jjlxrdh">
+                    <n-input v-model:value="formValue.jjlxrdh" placeholder="请输入紧急联系人电话" clearable />    
                 </n-form-item-gi >
-                <n-form-item-gi  label="备注:" path="bz">
-                    <n-input v-model:value="formValue.bz" placeholder="请输入备注" />    
-                </n-form-item-gi >
-                <n-form-item-gi  label="状态:" path="zt">
-                    <n-select
-                        v-model:value="formValue.zt"
-                        placeholder="请选择状态"
-                        :options="statusOptions"
-                    />
-                </n-form-item-gi >
+                <n-form-item-gi  :span="24" label="备注:"  path="bz" style="width:100%">
+                        <n-input
+                            v-model:value="formValue.bz"
+                            placeholder="请输入配件备注"
+                            type="textarea"
+                            clearable
+                            :autosize="{
+                                minRows: 2,
+                                maxRows: 3,
+                            }"
+                        />
+                    </n-form-item-gi >
             </n-grid >
             <n-flex justify="end">
                 
@@ -131,6 +133,7 @@ import { ref, onUnmounted, watch, onMounted } from 'vue'
 import type { FormInst, SelectOption } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
+import {generatePinyinFirstLetter } from '@/utils/dataPorc'
 
 const props = defineProps<{
   show: boolean
@@ -147,8 +150,8 @@ const formRef = ref<FormInst | null>(null)
 const showModal = ref(props.show)
 const message=useMessage()
 const formValue = ref({
-    gh:'',
     xm:'',
+    xmjp:'',
     xb:'',
     csrq: null,
     mz:'',
@@ -160,12 +163,12 @@ const formValue = ref({
     gzjb:'',
     rzrq: null,
     syq:'',
-    htsjzrq: null,
-    htsjzzrq: null,
-    emergencyContact:'',
-    emergencyContactPhone:'',
+    htqsrq: null,
+    htzzrq: null,
+    jjlxr:'',
+    jjlxrdh:'',
     bz:'',
-    zt:'',
+
     id: undefined
 })
 
@@ -174,11 +177,7 @@ const sexOptions = ref<SelectOption[]>([
     { label: '男', value: '男' },
     { label: '女', value: '女' }
 ])
-const statusOptions = ref<SelectOption[]>([
-    { label: '在职', value: '在职' },
-    { label: '离职', value: '离职' },
-    { label: '休假', value: '休假' }
-])
+
 const zwOptions = ref<SelectOption[]>([])
 const bmOptions = ref<SelectOption[]>([])
 
@@ -186,7 +185,7 @@ const bmOptions = ref<SelectOption[]>([])
 async function fetchEmployeeOptions() {
   try {
     // 获取员工列表
-    const employees = await apiClient.get('/employees')
+    const employees = await apiClient.get('/v1/employees')
     
     // 提取唯一的职位和部门值
     const positions = new Set<string>()
@@ -237,11 +236,11 @@ async function handleValidateClick() {
     // 调用后端API
     if (formValue.value.id) {
       // 有id字段，执行修改操作
-      await apiClient.put('/employees/' + formValue.value.id, submitData)
+      await apiClient.put('/v1/employees/' + formValue.value.id, submitData)
       message.success('数据修改成功')
     } else {
       // 无id字段，执行新增操作
-      await apiClient.post('/employees', submitData)
+      await apiClient.post('/v1/employees', submitData)
       message.success('数据保存成功')
     }
     
@@ -266,8 +265,8 @@ function handleClearForm() {
   if (!formRef.value) return
   // 重置表单数据
   formValue.value = {
-    gh:'',
     xm:'',
+    xmjp:'',
     xb:'',
     csrq: null,
     mz:'',
@@ -279,12 +278,12 @@ function handleClearForm() {
     gzjb:'',
     rzrq: null,
     syq:'',
-    htsjzrq: null,
-    htsjzzrq: null,
-    emergencyContact:'',
-    emergencyContactPhone:'',
+    htqsrq: null,
+    htzzrq: null,
+    jjlxr:'',
+    jjlxrdh:'',
     bz:'',
-    zt:'',
+
     id: undefined
   }
   // 清除表单校验状态
@@ -297,12 +296,12 @@ watch(() => props.show, (newVal) => {
 }, { deep: true })
 
 // 监听编辑数据变化
-watch(() => props.editData, (newData) => {
+    watch(() => props.editData, (newData) => {
   if (newData) {
     // 填充表单数据
     formValue.value = {
-      gh: newData.gh || '',
       xm: newData.xm || '',
+      xmjp:newData.xmjp || '',
       xb: newData.xb || '',
       csrq: newData.csrq || null,
       mz: newData.mz || '',
@@ -314,12 +313,11 @@ watch(() => props.editData, (newData) => {
       gzjb: newData.gzjb || '',
       rzrq: newData.rzrq || null,
       syq: newData.syq || '',
-      htsjzrq: newData.htsjzrq || null,
-      htsjzzrq: newData.htsjzzrq || null,
-      emergencyContact: newData.emergencyContact || '',
-      emergencyContactPhone: newData.emergencyContactPhone || '',
+      htqsrq: newData.htqsrq || null,
+      htzzrq: newData.htzzrq || null,
+      jjlxr: newData.jjlxr || '',
+      jjlxrdh: newData.jjlxrdh || '',
       bz: newData.bz || '',
-      zt: newData.zt || '',
       id: newData.id
     }
   } else {
@@ -334,6 +332,11 @@ function handleCancel() {
   emit('close') // 通知父组件关闭模态框
   handleClearForm() // 取消时同时清空表单
 }
+//获取姓名简拼
+watch(()=>formValue.value.xm, () => {
+  const jp =generatePinyinFirstLetter(formValue.value.xm);//获取简拼
+  formValue.value.xmjp=jp
+})
 
 // 组件挂载时获取下拉框数据
 onMounted(() => {

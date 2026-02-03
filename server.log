@@ -1,0 +1,56 @@
+
+> pgsql-backend@1.0.0 start
+> node app.js
+
+正在连接数据库...
+数据库连接成功！
+当前时间: 2026-02-02T11:27:43.916Z
+连接已释放
+正在初始化数据库表结构...
+数据库表结构初始化完成！
+服务器运行在 http://localhost:3000
+API接口文档:
+- GET  /api/health      - 健康检查
+- GET  /api/menus       - 获取菜单列表（树形结构）
+- GET  /api/menus/:key  - 获取菜单详情
+- POST /api/menus       - 创建菜单
+- PUT  /api/menus/:key  - 更新菜单
+- DELETE /api/menus/:key - 删除菜单
+- POST /api/menus/batch - 批量操作菜单
+- GET  /api/vehicle-models       - 获取车型列表
+- GET  /api/vehicle-models/search - 搜索车型
+- GET  /api/parts       - 获取配件列表
+- GET  /api/parts/search - 搜索配件
+- GET  /api/inventory       - 获取库存列表
+- GET  /api/inventory/search - 根据车型和配件搜索库存
+- POST /api/part-info       - 创建配件基本资料
+- GET  /api/part-info       - 获取所有配件基本资料
+- GET  /api/part-info/:id   - 获取单个配件基本资料
+- PUT  /api/part-info/:id   - 更新配件基本资料
+- DELETE /api/part-info/:id - 删除配件基本资料
+- GET  /api/part-info/search - 搜索配件基本资料
+- POST /api/customers       - 创建客户资料
+- GET  /api/customers       - 获取客户资料列表
+- GET  /api/customers/:id   - 获取客户详情
+- PUT  /api/customers/:id   - 更新客户资料
+- DELETE /api/customers/:id - 删除客户资料
+- GET  /api/customers/search - 搜索客户资料
+- POST /api/employees       - 创建员工资料
+- GET  /api/employees       - 获取员工资料列表
+- GET  /api/employees/:id   - 获取员工详情
+- PUT  /api/employees/:id   - 更新员工资料
+- DELETE /api/employees/:id - 删除员工资料
+- GET  /api/employees/search - 搜索员工资料
+- POST /api/logistics       - 创建物流资料
+- GET  /api/logistics       - 获取物流资料列表
+- GET  /api/logistics/:id   - 获取物流详情
+- PUT  /api/logistics/:id   - 更新物流资料
+- DELETE /api/logistics/:id - 删除物流资料
+执行SQL: SELECT * FROM employee_info ORDER BY xm LIMIT 20
+参数: []
+执行SQL: SELECT * FROM employee_info ORDER BY xm LIMIT 20
+参数: []
+执行SQL: SELECT * FROM employee_info ORDER BY xm LIMIT 20
+参数: []
+执行SQL: SELECT * FROM employee_info ORDER BY xm LIMIT 20
+参数: []

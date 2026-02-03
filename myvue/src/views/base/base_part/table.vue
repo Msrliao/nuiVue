@@ -138,7 +138,7 @@ function handleSelect(key: string) {
       onPositiveClick: async () => {
         try {
           // 调用API删除配件
-          await apiClient.delete(`/part-info/${currentRow.value?.id}`)
+          await apiClient.delete(`/v1/parts/${currentRow.value?.id}`)
           message.success('配件删除成功')
           // 触发刷新事件
           emit('refresh')

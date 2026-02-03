@@ -25,7 +25,7 @@ const khdqOptions = ref<SelectOption[]>([])
 async function fetchCustomerOptions() {
   try {
     // 获取客户列表
-    const customers = await apiClient.get('/customers')
+    const customers = await apiClient.get('/v1/customers')
     
     // 提取唯一的客户类型和客户地区值
     const customerTypes = new Set<string>()
@@ -95,7 +95,7 @@ async function fetchCustomerData(params?: any) {
     }
     
     // 使用统一的API接口，传递处理后的搜索参数
-    const response = await apiClient.get('/customers', { params: processedParams })
+    const response = await apiClient.get('/v1/customers', { params: processedParams })
     // apiClient已经处理了响应格式，直接使用返回的数据
     customerData.value = response || []
   } catch (error: any) {
@@ -146,13 +146,13 @@ function handleEdit(data: any) {
 <template>
     <n-flex >
         <n-form-item label="客户简拼:" >
-            <n-input v-model:value="formValue.khjp" placeholder="请输入客户简拼"/>
+            <n-input v-model:value="formValue.khjp" placeholder="请输入客户简拼" clearable/>
         </n-form-item>
         <n-form-item label="联系电话:">
-            <n-input v-model:value="formValue.lxdh" placeholder="请输入联系电话" />
+            <n-input v-model:value="formValue.lxdh" placeholder="请输入联系电话" clearable />
         </n-form-item>
         <n-form-item label="联系人简拼:" >
-            <n-input v-model:value="formValue.lxrjp" placeholder="请输入联系人简拼"/>
+            <n-input v-model:value="formValue.lxrjp" placeholder="请输入联系人简拼" clearable/>
         </n-form-item>
         <n-form-item label="客户类型:" >
              <n-select

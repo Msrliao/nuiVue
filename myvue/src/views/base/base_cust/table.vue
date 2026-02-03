@@ -28,31 +28,9 @@ import { h, nextTick, ref } from 'vue'
 import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import { useMessage, useDialog } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
+import type {RowData} from '@/types'
 
-interface RowData {
-  id: number
-  khjc: string; // 客户简称
-  khjp: string; // 客户简拼
-  khqc: string; // 客户全称
-  lxr: string; // 联系人
-  lxdh: string; // 联系电话
-  zxdh: string; // 座机电话
-  qtlxfs: string; // 其他联系方式
-  lxdz: string; // 联系地址
-  yhzhm: string; // 银行账户名
-  yhzh: string; // 银行账号
-  ssyh: string; // 所属银行
-  khlx: string[]; // 客户类型
-  jyfw: string[]; // 经营范围
-  ssqd: string[]; // 所属地区
-  fkfs: string[]; // 付款方式
-  mrwl: string[]; // 默认物流
-  mryhfs: string[]; // 默认运货方式
-  bz: string; // 备注
-  created_at?: string; // 创建时间
-  updated_at?: string; // 更新时间
-  key?: number; // 行标识
-}
+
 
 // 接收父组件传递的数据和加载状态
 const props = defineProps<{
@@ -205,7 +183,7 @@ function handleSelect(key: string) {
       onPositiveClick: async () => {
         try {
           // 调用API删除客户
-          await apiClient.delete(`/customers/${currentRow.value?.id}`)
+          await apiClient.delete(`/v1/customers/${currentRow.value?.id}`)
           message.success('客户删除成功')
           // 触发刷新事件
           emit('refresh')

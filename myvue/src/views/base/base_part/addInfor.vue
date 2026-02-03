@@ -17,16 +17,16 @@
             >
                 <n-grid cols="1 s:1 m:2 l:2 xl:2 2xl:2" responsive="screen">
                     <n-form-item-gi  label="序码:" path="xm">
-                        <n-input v-model:value="formValue.xm" placeholder="请输入配件序码" />
+                        <n-input v-model:value="formValue.xm" placeholder="请输入配件序码" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="编码:" path="bm">
-                        <n-input v-model:value="formValue.bm" placeholder="请输入配件编码" />
+                        <n-input v-model:value="formValue.bm" placeholder="请输入配件编码" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="名称:" path="mc">
-                        <n-input v-model:value="formValue.mc" placeholder="请输入配件名称" />
+                        <n-input v-model:value="formValue.mc" placeholder="请输入配件名称" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="简拼:" path="jp">
-                        <n-input v-model:value="formValue.jp" placeholder="请输入配件简拼" disabled="false" />
+                        <n-input v-model:value="formValue.jp" placeholder="请输入配件简拼" disabled="false" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="车型:"  path="cx">
                         <n-select
@@ -75,21 +75,22 @@
                             :loading="loading"
                         />
                     </n-form-item-gi >
-                    <n-form-item-gi  label="预设进价:"  path="ysjj">
-                        <n-input v-model:value="formValue.ysjj" placeholder="请输入预设进价" />
-                    </n-form-item-gi >
-                
-                    <n-form-item-gi  :span="24" label="备注:"  path="bz" style="width:100%">
-                        <n-input
-                            v-model:value="formValue.bz"
-                            placeholder="请输入配件备注"
-                            type="textarea"
-                            :autosize="{
-                                minRows: 2,
-                                maxRows: 3,
-                            }"
-                        />
-                    </n-form-item-gi >
+                <n-form-item-gi  label="预设进价:"  path="ysjj">
+                    <n-input v-model:value="formValue.ysjj" placeholder="请输入预设进价" clearable />
+                </n-form-item-gi >
+            
+                <n-form-item-gi  :span="24" label="备注:"  path="bz" style="width:100%">
+                    <n-input
+                        v-model:value="formValue.bz"
+                        placeholder="请输入配件备注"
+                        type="textarea"
+                        clearable
+                        :autosize="{
+                            minRows: 2,
+                            maxRows: 3,
+                        }"
+                    />
+                </n-form-item-gi >
                     
                 </n-grid >
                 <n-flex justify="end">
@@ -207,11 +208,11 @@ async function fetchWarehouseAndPositionData() {
   try {
     // 获取仓库列表
     // 响应拦截器已经处理了响应，直接使用结果
-    const warehouses = await apiClient.get('/warehouses')
+    const warehouses = await apiClient.get('/v1/warehouses')
     
     // 获取库位列表
     // 响应拦截器已经处理了响应，直接使用结果
-    const positions = await apiClient.get('/positions')
+    const positions = await apiClient.get('/v1/positions')
     
     // 为每个仓库创建一个根节点，使用负数ID确保不与仓库和库位ID冲突
     const treeData: TreeSelectOption[] = warehouses.map((warehouse: any, index: number) => {
@@ -244,7 +245,7 @@ async function fetchPartInfoData() {
   loading.value = true
   try {
     // 响应拦截器已经处理了响应，直接使用结果
-    const partInfoList = await apiClient.get('/part-info')
+    const partInfoList = await apiClient.get('/v1/parts')
     
     // 提取唯一的车型、单位、品牌、规格
     const vehicles = new Set<string>()
@@ -310,11 +311,11 @@ async function handleValidateClick() {
         // 响应拦截器已经处理了响应，直接使用结果
         if (formValue.value.id) {
           // 有id字段，执行修改操作
-          await apiClient.put('/part-info/' + formValue.value.id, formValue.value)
+          await apiClient.put('/v1/parts/' + formValue.value.id, formValue.value)
           message.success('数据修改成功')
         } else {
           // 无id字段，执行新增操作
-          await apiClient.post('/part-info', formValue.value)
+          await apiClient.post('/v1/parts', formValue.value)
           message.success('数据保存成功')
         }
         // 清空表单

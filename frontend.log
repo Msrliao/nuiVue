@@ -1,0 +1,14 @@
+
+> myvue@0.0.0 dev
+> vite --host 0.0.0.0
+
+
+  VITE v7.3.1  ready in 828 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://192.168.96.226:5173/
+  ➜  Vue DevTools: Open http://localhost:5173/__devtools__/ as a separate window
+  ➜  Vue DevTools: Press Alt(⌥)+Shift(⇧)+D in App to toggle the Vue DevTools
+11:30:30 AM [vite] changed tsconfig file detected: /workspace/Vue-TypeScript/myvue/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+11:49:08 AM [vite] (client) hmr update /src/views/base/base_emp/addInfor.vue
+11:49:24 AM [vite] (client) hmr update /src/views/base/base_emp/addInfor.vue

@@ -44,7 +44,7 @@ async function fetchLogisticsData(params?: any) {
   loading.value = true
   try {
     // 使用统一的API接口，直接传递搜索参数
-    const response = await apiClient.get('/logistics', { params })
+    const response = await apiClient.get('/v1/logistics', { params })
     // apiClient已经处理了响应格式，直接使用返回的数据
     logisticsData.value = response || []
   } catch (error: any) {
@@ -92,13 +92,13 @@ function handleEdit(data: any) {
 <template>
     <n-flex >
         <n-form-item label="物流简拼:" >
-            <n-input v-model:value="formValue.wljp" placeholder="请输入物流简拼"/>
+            <n-input v-model:value="formValue.wljp" placeholder="请输入物流简拼" clearable/>
         </n-form-item>
         <n-form-item label="联系人:" >
-            <n-input v-model:value="formValue.lxr" placeholder="请输入联系人" />
+            <n-input v-model:value="formValue.lxr" placeholder="请输入联系人" clearable />
         </n-form-item>
         <n-form-item label="联系电话:" >
-            <n-input v-model:value="formValue.lxdh" placeholder="请输入联系电话" />
+            <n-input v-model:value="formValue.lxdh" placeholder="请输入联系电话" clearable />
         </n-form-item>
         <n-form-item label="来往地区:" >
            <n-select

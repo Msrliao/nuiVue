@@ -9,11 +9,10 @@ async function initDatabase() {
   console.log('正在初始化数据库表结构...');
   const client = await pool.connect();
   try {
-    // 创建员工信息表
+    // 创建员工信息表（已移除 gh 工号字段和 zt 状态字段）
     await client.query(`
       CREATE TABLE IF NOT EXISTS employee_info (
         id SERIAL PRIMARY KEY,
-        gh VARCHAR(50) NOT NULL,
         xm VARCHAR(100) NOT NULL,
         xb VARCHAR(10),
         csrq DATE,
@@ -31,14 +30,15 @@ async function initDatabase() {
         emergencyContact VARCHAR(100),
         emergencyContactPhone VARCHAR(20),
         bz TEXT,
-        zt VARCHAR(20) DEFAULT '在职',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
+    // 删除 gh 字段的索引（如果存在）
+    await client.query(`DROP INDEX IF EXISTS idx_employee_gh;`);
+    
     // 创建索引
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_employee_gh ON employee_info(gh);`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_employee_xm ON employee_info(xm);`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_employee_bm ON employee_info(bm);`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_employee_zw ON employee_info(zw);`);
@@ -87,6 +87,15 @@ const employeeService = require('./pgsqlDemo/employeeService');
 const logisticsService = require('./pgsqlDemo/logisticsService');
 const DK = require('./getDKData/getData');
 
+// 导入新的 REST API 路由（符合 API 设计最佳实践）
+const employeeRoutes = require('./routes/employees');
+const customerRoutes = require('./routes/customers');
+const logisticsRoutes = require('./routes/logistics');
+const warehouseRoutes = require('./routes/warehouses');
+const positionRoutes = require('./routes/positions');
+const partsRoutes = require('./routes/parts');
+const menuRoutes = require('./routes/menus');
+
 
 // 初始化Express应用
 const app = express();
@@ -130,6 +139,16 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// 使用新的 REST API 路由（符合 API 设计最佳实践，使用 /api/v1/ 前缀）
+app.use('/api/v1/employees', employeeRoutes);
+app.use('/api/v1/customers', customerRoutes);
+app.use('/api/v1/logistics', logisticsRoutes);
+app.use('/api/v1/warehouses', warehouseRoutes);
+app.use('/api/v1/positions', positionRoutes);
+app.use('/api/v1/parts', partsRoutes);
+app.use('/api/v1/menus', menuRoutes);
+
+// 保留旧版 API 路由以向后兼容（将逐步弃用）
 // 获取菜单列表（树形结构）
 app.get('/api/menus', async (req, res) => {
   try {
@@ -668,10 +687,12 @@ app.delete('/api/employees/:id', async (req, res) => {
 app.get('/api/employees/search', async (req, res) => {
   try {
     const { keyword } = req.query;
+
     if (!keyword) {
       errorResponse(res, 400, '请求参数错误', 'keyword参数不能为空');
       return;
     }
+    console.log('员工资料',keyword)
     const employees = await employeeService.searchEmployees(keyword);
     successResponse(res, employees, '搜索员工资料成功');
   } catch (error) {

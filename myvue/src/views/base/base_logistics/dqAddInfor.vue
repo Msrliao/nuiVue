@@ -9,26 +9,26 @@
         >
             <n-grid cols="1 s:1 m:2 l:2 xl:2 2xl:2" responsive="screen">
                 <n-form-item-gi  label="地区名称:" path="dq">
-                    <n-input v-model:value="formValue.dq" placeholder="请输入地区名称" />
+                    <n-input v-model:value="formValue.dq" placeholder="请输入地区名称" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="地区简拼:" path="dqJp">
-                    <n-input v-model:value="formValue.dqJp" placeholder="请输入地区简拼" />
+                    <n-input v-model:value="formValue.dqJp" placeholder="请输入地区简拼" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系人:" path="lxr">
-                    <n-input v-model:value="formValue.lxr" placeholder="请输入联系人" />
+                    <n-input v-model:value="formValue.lxr" placeholder="请输入联系人" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系人电话:" path="lxdh">
-                    <n-input v-model:value="formValue.lxdh" placeholder="请输入联系人电话" />
+                    <n-input v-model:value="formValue.lxdh" placeholder="请输入联系人电话" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="其它联系方式:" path="qtlxfs">
-                    <n-input v-model:value="formValue.qtlxfs" placeholder="请输入其它联系方式" /> 
+                    <n-input v-model:value="formValue.qtlxfs" placeholder="请输入其它联系方式" clearable /> 
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系地址:" path="contactAddress">
-                    <n-input v-model:value="formValue.lxdz" placeholder="请输入联系地址" type="textarea" /> 
+                    <n-input v-model:value="formValue.lxdz" placeholder="请输入联系地址" type="textarea" clearable /> 
                 </n-form-item-gi >
                 
                 <n-form-item-gi  label="备注:" path="bz">
-                    <n-input v-model:value="formValue.bz" placeholder="请输入备注" type="textarea" />
+                    <n-input v-model:value="formValue.bz" placeholder="请输入备注" type="textarea" clearable />
                 </n-form-item-gi >
             </n-grid >
             <n-flex justify="end">
@@ -104,11 +104,11 @@ async function handleValidateClick() {
     // 调用后端API
     if (formValue.value.id) {
       // 有id字段，执行修改操作
-      await apiClient.put('/logistics/' + formValue.value.id, submitData)
+      await apiClient.put('/v1/logistics/' + formValue.value.id, submitData)
       message.success('数据修改成功')
     } else {
       // 无id字段，执行新增操作
-      await apiClient.post('/logistics', submitData)
+      await apiClient.post('/v1/logistics', submitData)
       message.success('数据保存成功')
     }
     

@@ -77,7 +77,7 @@ async function fetchPositionData() {
     if (tableSelectedData.value.id) {
       // 获取指定仓库的仓位
       // 响应拦截器已经处理了响应，直接使用结果
-      positions = await apiClient.get(`/positions/warehouse/${tableSelectedData.value.id}`)
+      positions = await apiClient.get(`/v1/positions/warehouse/${tableSelectedData.value.id}`)
     }
     
     // 构建树形结构
@@ -151,7 +151,7 @@ function handleSelect(key: string) {
       onPositiveClick: async () => {
         try {
           // 调用API删除仓库
-          await apiClient.delete(`/positions/${optionsVal.value?.key}`)
+          await apiClient.delete(`/v1/positions/${optionsVal.value?.key}`)
           message.success('仓库删除成功')
           // 刷新表格数据
           fetchPositionData()

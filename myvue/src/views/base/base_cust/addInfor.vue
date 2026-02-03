@@ -17,34 +17,34 @@
             >
                 <n-grid cols="1 s:1 m:2 l:2 xl:2 2xl:2" responsive="screen">
                     <n-form-item-gi  label="客户简称:" path="khjc">
-                        <n-input v-model:value="formValue.khjc" placeholder="请输入客户简称" />
+                        <n-input v-model:value="formValue.khjc" placeholder="请输入客户简称" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="客户简拼:" path="khjp">
-                        <n-input v-model:value="formValue.khjp" placeholder="请输入客户简拼"  disabled="false" />
+                        <n-input v-model:value="formValue.khjp" placeholder="请输入客户简拼"  disabled="false" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="客户全称:" path="khqc">
-                        <n-input v-model:value="formValue.khqc" placeholder="请输入客户全称" />
+                        <n-input v-model:value="formValue.khqc" placeholder="请输入客户全称" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="联系人:" path="lxr">
-                        <n-input v-model:value="formValue.lxr" placeholder="请输入联系人" />
+                        <n-input v-model:value="formValue.lxr" placeholder="请输入联系人" clearable />
                     </n-form-item-gi >
                      <n-form-item-gi  label="联系电话:" path="lxdh">
-                        <n-input v-model:value="formValue.lxdh" placeholder="请输入联系电话" />
+                        <n-input v-model:value="formValue.lxdh" placeholder="请输入联系电话" clearable />
                     </n-form-item-gi >
                      <n-form-item-gi  label="座机电话:" path="zxdh">
-                        <n-input v-model:value="formValue.zxdh" placeholder="请输入座机电话" />
+                        <n-input v-model:value="formValue.zxdh" placeholder="请输入座机电话" clearable />
                     </n-form-item-gi >
                      <n-form-item-gi  label="其他联系方式:" path="qtlxfs">
-                        <n-input v-model:value="formValue.qtlxfs" placeholder="请输入其他联系方式" />
+                        <n-input v-model:value="formValue.qtlxfs" placeholder="请输入其他联系方式" clearable />
                     </n-form-item-gi >
                      <n-form-item-gi  label="联系地址:" path="lxdz">
-                        <n-input v-model:value="formValue.lxdz" placeholder="请输入联系地址" />
+                        <n-input v-model:value="formValue.lxdz" placeholder="请输入联系地址" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="银行账户名:" path="yhzhm">
-                        <n-input v-model:value="formValue.yhzhm" placeholder="请输入银行账户名" />
+                        <n-input v-model:value="formValue.yhzhm" placeholder="请输入银行账户名" clearable />
                     </n-form-item-gi >
                      <n-form-item-gi  label="银行账号:" path="yhzh">
-                        <n-input v-model:value="formValue.yhzh" placeholder="请输入银行账号" />
+                        <n-input v-model:value="formValue.yhzh" placeholder="请输入银行账号" clearable />
                     </n-form-item-gi >
                 
                     <n-form-item-gi  label="所属银行:"  path="ssyh">
@@ -122,6 +122,7 @@
                             v-model:value="formValue.bz"
                             placeholder="请输入备注"
                             type="textarea"
+                            clearable
                             :autosize="{
                                 minRows: 2,
                                 maxRows: 3,
@@ -205,7 +206,7 @@ const mryhfsOptions = ref<SelectOption[]>([])
 async function fetchCustomerOptions() {
   try {
     // 获取客户列表
-    const customers = await apiClient.get('/customers')
+    const customers = await apiClient.get('/v1/customers')
     
     // 提取唯一的选项值
     const banks = new Set<string>()
@@ -317,11 +318,11 @@ async function handleValidateClick() {
     // 调用后端API
     if (formValue.value.id) {
       // 有id字段，执行修改操作
-      await apiClient.put('/customers/' + formValue.value.id, submitData)
+      await apiClient.put('/v1/customers/' + formValue.value.id, submitData)
       message.success('数据修改成功')
     } else {
       // 无id字段，执行新增操作
-      await apiClient.post('/customers', submitData)
+      await apiClient.post('/v1/customers', submitData)
       message.success('数据保存成功')
     }
     

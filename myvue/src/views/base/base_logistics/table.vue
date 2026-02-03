@@ -160,7 +160,7 @@ function handleSelect(key: string) {
       onPositiveClick: async () => {
         try {
           // 调用API删除物流资料
-          await apiClient.delete(`/logistics/${currentRow.value?.id}`)
+          await apiClient.delete(`/v1/logistics/${currentRow.value?.id}`)
           message.success('物流资料删除成功')
           // 触发刷新事件
           emit('refresh')

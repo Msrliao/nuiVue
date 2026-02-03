@@ -17,7 +17,7 @@
             >
                 <n-grid cols="1 s:1 m:1 l:1 xl:1 2xl:1" responsive="screen">
                     <n-form-item-gi  label="仓库名称:" path="position_name">
-                        <n-input v-model:value="formValue.position_name" placeholder="请输入仓库名称" />
+                        <n-input v-model:value="formValue.position_name" placeholder="请输入仓库名称" clearable />
                     </n-form-item-gi >
                     
                 </n-grid >
@@ -152,7 +152,7 @@ async function handleValidateClick() {
         console.log('校验通过:', formValue.value)
         if(formValue.value.id){ // 更新仓位
             // 响应拦截器已经处理了响应，直接使用结果
-            const response: ApiResponse<PositionFormData> = await apiClient.put(`/positions/${formValue.value.id}`, formValue.value)
+            const response: ApiResponse<PositionFormData> = await apiClient.put(`/v1/positions/${formValue.value.id}`, formValue.value)
             if(response && response.code === 200){
                 message.success('仓位更新成功')
             }
@@ -164,7 +164,7 @@ async function handleValidateClick() {
             // 调用API提交数据
             // 响应拦截器已经处理了响应，直接使用结果
             console.log('创建仓位', formValue.value)
-            const response: ApiResponse<PositionFormData> = await apiClient.post('/positions', formValue.value)
+            const response: ApiResponse<PositionFormData> = await apiClient.post('/v1/positions', formValue.value)
             if(response && response.code === 200){
                 message.success('仓位创建成功')
             }

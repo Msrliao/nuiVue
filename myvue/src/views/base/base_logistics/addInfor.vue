@@ -9,25 +9,25 @@
         >
             <n-grid cols="1 s:1 m:2 l:2 xl:2 2xl:2" responsive="screen">
                 <n-form-item-gi  label="物流名称:" path="wlmc">
-                    <n-input v-model:value="formValue.wlmc" placeholder="请输入物流名称" />
+                    <n-input v-model:value="formValue.wlmc" placeholder="请输入物流名称" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="物流简拼:" path="wljp">
-                    <n-input v-model:value="formValue.wljp" placeholder="请输入物流简拼" />
+                    <n-input v-model:value="formValue.wljp" placeholder="请输入物流简拼" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系人:" path="lxr">
-                    <n-input v-model:value="formValue.lxr" placeholder="请输入联系人" />
+                    <n-input v-model:value="formValue.lxr" placeholder="请输入联系人" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系人简拼:" path="lxrJp">
-                    <n-input v-model:value="formValue.lxrJp" placeholder="请输入联系人简拼" />
+                    <n-input v-model:value="formValue.lxrJp" placeholder="请输入联系人简拼" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系人电话:" path="lxrPhone">
-                    <n-input v-model:value="formValue.lxrPhone" placeholder="请输入联系人电话" />
+                    <n-input v-model:value="formValue.lxrPhone" placeholder="请输入联系人电话" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="其它联系方式:" path="otherContact">
-                    <n-input v-model:value="formValue.otherContact" placeholder="请输入其它联系方式" /> 
+                    <n-input v-model:value="formValue.otherContact" placeholder="请输入其它联系方式" clearable /> 
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系地址:" path="contactAddress">
-                    <n-input v-model:value="formValue.contactAddress" placeholder="请输入联系地址" type="textarea" /> 
+                    <n-input v-model:value="formValue.contactAddress" placeholder="请输入联系地址" type="textarea" clearable /> 
                 </n-form-item-gi >
                 <n-form-item-gi  label="来往地区:" path="lwdq">
                     <n-select
@@ -49,13 +49,13 @@
                 </n-form-item-gi >
                 
                 <n-form-item-gi  label="代收隔收天数:" path="dscsjl">
-                    <n-input v-model:value="formValue.dscsjl" placeholder="请输入代收隔收天数" />
+                    <n-input v-model:value="formValue.dscsjl" placeholder="请输入代收隔收天数" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="发放代收方式:" path="ffdsfs">
-                    <n-input v-model:value="formValue.ffdsfs" placeholder="请输入发放代收方式" />
+                    <n-input v-model:value="formValue.ffdsfs" placeholder="请输入发放代收方式" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="备注:" path="bz">
-                    <n-input v-model:value="formValue.bz" placeholder="请输入备注" type="textarea" />
+                    <n-input v-model:value="formValue.bz" placeholder="请输入备注" type="textarea" clearable />
                 </n-form-item-gi >
             </n-grid >
             <n-flex justify="end">
@@ -156,11 +156,11 @@ async function handleValidateClick() {
     // 调用后端API
     if (formValue.value.id) {
       // 有id字段，执行修改操作
-      await apiClient.put('/logistics/' + formValue.value.id, submitData)
+      await apiClient.put('/v1/logistics/' + formValue.value.id, submitData)
       message.success('数据修改成功')
     } else {
       // 无id字段，执行新增操作
-      await apiClient.post('/logistics', submitData)
+      await apiClient.post('/v1/logistics', submitData)
       message.success('数据保存成功')
     }
     
