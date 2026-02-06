@@ -8,6 +8,9 @@
     :loading="props.loading"
     striped
     :row-key="(row: RowData) => row.id"
+    :max-height="maxHeight"
+    :scroll-x="scrollX"
+    virtual-scroll
   />
   <n-dropdown
     placement="bottom-start"
@@ -24,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { h, nextTick, ref } from 'vue'
+import { computed, h, nextTick, ref } from 'vue'
 import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import { useMessage, useDialog } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
@@ -68,56 +71,69 @@ function createColumns(): DataTableColumns<RowData> {
     {
       title: '物流单号',
       key: 'logisticsNo',
-      sorter: 'default'
+      sorter: 'default',
+      width: 140
     },
     {
       title: '物流公司',
       key: 'logisticsCompany',
-      sorter: 'default'
+      sorter: 'default',
+      width: 140
     },
     {
       title: '发货人',
-      key: 'sender'
+      key: 'sender',
+      width: 100
     },
     {
       title: '发货人电话',
-      key: 'senderPhone'
+      key: 'senderPhone',
+      width: 130
     },
     {
       title: '收货人',
-      key: 'receiver'
+      key: 'receiver',
+      width: 100
     },
     {
       title: '收货人电话',
-      key: 'receiverPhone'
+      key: 'receiverPhone',
+      width: 130
     },
     {
       title: '收货地址',
-      key: 'receiverAddress'
+      key: 'receiverAddress',
+      width: 200
     },
     {
       title: '发货日期',
-      key: 'sendDate'
+      key: 'sendDate',
+      width: 120
     },
     {
       title: '预计到达日期',
-      key: 'expectedArrivalDate'
+      key: 'expectedArrivalDate',
+      width: 130
     },
     {
       title: '实际到达日期',
-      key: 'actualArrivalDate'
+      key: 'actualArrivalDate',
+      width: 130
     },
     {
       title: '状态',
-      key: 'status'
+      key: 'status',
+      width: 100
     },
     {
       title: '跟踪网址',
-      key: 'trackingUrl'
+      key: 'trackingUrl',
+      width: 200
     },
     {
       title: '备注',
-      key: 'notes'
+      key: 'notes',
+      width: 200
     }
   ]
 }
@@ -126,7 +142,13 @@ function createColumns(): DataTableColumns<RowData> {
 const message = useMessage()
 const dialog = useDialog()
 const columns = createColumns()
-
+const maxHeight = computed(() => {
+  // 视口高度减去顶部搜索区域(约60px)、分页区域(约60px)和其他边距(约20px)
+  return window.innerHeight - 140
+})
+const scrollX = computed(() => {
+  return columns.reduce((sum, col) => sum + ((col as any).width || 0), 0)
+})
 const options: DropdownOption[] = [
   {
     label: '编辑',

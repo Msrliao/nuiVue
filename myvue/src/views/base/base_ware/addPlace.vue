@@ -44,9 +44,9 @@ import { storeToRefs } from 'pinia'
 import type { ApiResponse } from '@/types'
 
 // 定义仓位表单数据类型
-type PositionFormData = {
-  id?: number
-  warehouse_id: number
+interface PositionFormData {
+  id?: number | null
+  warehouse_id: number | null
   position_name: string
   parent_id?: number
   description?: string
@@ -73,7 +73,7 @@ const showModal = ref(props.show)
 const butLoading= ref(false)
 // 定义提交数据
 const formValue = ref<PositionFormData>({
-    id: null,
+    id : null,
     warehouse_id: null,
     position_name: '',
     parent_id: null,

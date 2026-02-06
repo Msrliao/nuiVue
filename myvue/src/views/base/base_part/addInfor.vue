@@ -129,12 +129,14 @@ const formRef = ref<FormInst | null>(null)
 const props = defineProps<{
   show: boolean
   editData: PartInfoData | null
+  dkData?: any // 大库选中行数据（可选）
 }>()
 
 // 定义事件
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'refresh'): void
+  (e: 'clearDkData'): void // 清空大库数据事件
 }>()
 
 // 定义本弹窗显示状态
@@ -410,6 +412,27 @@ watch(() => props.editData, (newData) => {
 // 监听 show 属性变化
 watch(() => props.show, (newVal) => {
   showModal.value = newVal
+  // 当弹窗打开且没有编辑数据时，如果有大库数据则填充表单
+  if (newVal && !props.editData && props.dkData) {
+    // 将大库数据映射到表单字段
+    formValue.value = {
+      xm: '', // 序码需要系统生成或留空
+      bm: props.dkData['商品编码'] || '',
+      mc: props.dkData['商品名称'] || '',
+      jp: generatePinyinFirstLetter(props.dkData['商品名称'] || ''),
+      cx: props.dkData['车型'] ? [props.dkData['车型']] : [],
+      cxjp: generatePinyinFirstLetter(props.dkData['车型'] || ''),
+      dw: '', // 单位从大库数据无法获取
+      pp: props.dkData['品牌'] || '',
+      gg: [], // 规格从大库数据无法获取
+      kw: '', // 库位需要用户选择
+      ysjj: props.dkData['参考进价'] ? String(props.dkData['参考进价']) : '',
+      bz: '', // 备注留空
+      id: undefined
+    }
+    // 通知父组件清空大库数据，避免重复填充
+    emit('clearDkData')
+  }
 }, { immediate: true })
 
 // 组件挂载时获取数据

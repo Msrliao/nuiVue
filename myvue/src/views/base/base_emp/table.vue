@@ -133,14 +133,14 @@ function createColumns(): DataTableColumns<empData> {
     },
     {
       title: '合同起始日期',
-      key: 'htsjzrq',
-      render: (row) => formatDate(row.htsjzrq),
+      key: 'htqsrq',
+      render: (row) => formatDate(row.htqsrq),
       width:105
     },
     {
       title: '合同终止日期',
-      key: 'htsjzzrq',
-      render: (row) => formatDate(row.htsjzzrq),
+      key: 'htzzrq',
+      render: (row) => formatDate(row.htzzrq),
       width:105
     },
     {
@@ -186,10 +186,9 @@ const showDropdown = showDropdownRef
 const x = xRef
 const y = yRef
 
-// 计算横向滚动宽度（所有列宽之和 + 序号列宽）
+// 计算横向滚动宽度（所有列宽之和）
 const scrollX = computed(() => {
-  const columnWidths = [60, 80, 60, 105, 60, 120, 180, 180, 100, 100, 100, 105, 80, 105, 105, 100, 100, 200]
-  return columnWidths.reduce((sum, width) => sum + width, 0)
+  return columns.reduce((sum, col) => sum + ((col as any).width || 0), 0)
 })
 
 // 计算表格最大高度（减去搜索区域和分页区域的高度）

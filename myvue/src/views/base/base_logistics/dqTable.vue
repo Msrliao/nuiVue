@@ -8,6 +8,9 @@
     :loading="props.loading"
     striped
     :row-key="(row: RowData) => row.id"
+    :max-height="maxHeight"
+    :scroll-x="scrollX"
+    virtual-scroll
   />
   <n-dropdown
     placement="bottom-start"
@@ -24,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { h, nextTick, ref } from 'vue'
+import { computed, h, nextTick, ref } from 'vue'
 import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import { useMessage, useDialog } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
@@ -55,33 +58,49 @@ const emit = defineEmits<{
 // 定义右键点击的行数据
 const currentRow = ref<RowData | null>(null)
 
+// 表格滚动配置
+const maxHeight = computed(() => {
+  // 视口高度减去顶部搜索区域(约60px)、分页区域(约60px)和其他边距(约20px)
+  return window.innerHeight - 140
+})
+
+const scrollX = computed(() => {
+  return columns.reduce((sum, col) => sum + ((col as any).width || 0), 0)
+})
+
 function createColumns(): DataTableColumns<RowData> {
   return [
     {
       title: '地区',
       key: 'dq',
-      sorter: 'default'
+      sorter: 'default',
+      width: 120
     },
     {
       title: '联系人',
       key: 'lxr',
-      sorter: 'default'
+      sorter: 'default',
+      width: 120
     },
     {
       title: '联系电话',
-      key: 'lxdh'
+      key: 'lxdh',
+      width: 150
     },
     {
       title: '其它联系方式',
-      key: 'qtlxfs'
+      key: 'qtlxfs',
+      width: 150
     },
     {
       title: '联系地址',
-      key: 'lxdz'
+      key: 'lxdz',
+      width: 300
     },
     {
       title: '备注',
-      key: 'notes'
+      key: 'notes',
+      width: 200
     }
   ]
 }

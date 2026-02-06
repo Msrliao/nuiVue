@@ -79,6 +79,7 @@ const butLoading=ref(false)
 
 // 定义提交数据
 const formValue = ref({
+    id:'',
     ckmc: '',
     fzr: '',
     lxdh: '',
@@ -150,10 +151,14 @@ async function handleValidateClick() {
         const response = forData.id
             ?await apiClient.put(`/v1/warehouses/${forData.id}`, forData)
             :await apiClient.post('/v1/warehouses',forData);
-            
-        response.code === 200
-            ?message.success('操作成功!')
-            :message.error('操作失败！')
+    
+        //response.code === 200
+            // ?message.success('操作成功!')
+           // :message.error('操作失败！')
+           
+           response
+             ?message.success('操作成功!')
+             :message.error('操作失败！')
         
         // 关闭弹窗并清空表单
         handleCancel()

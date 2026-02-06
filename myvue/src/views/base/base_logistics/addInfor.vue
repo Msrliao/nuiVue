@@ -12,7 +12,7 @@
                     <n-input v-model:value="formValue.wlmc" placeholder="请输入物流名称" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="物流简拼:" path="wljp">
-                    <n-input v-model:value="formValue.wljp" placeholder="请输入物流简拼" clearable />
+                    <n-input v-model:value="formValue.wljp" placeholder="请输入物流简拼"  disabled="false" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系人:" path="lxr">
                     <n-input v-model:value="formValue.lxr" placeholder="请输入联系人" clearable />
@@ -81,6 +81,8 @@ import { ref, onUnmounted, watch, onMounted } from 'vue'
 import type { FormInst, SelectOption } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
+import { generatePinyinFirstLetter } from "@/utils/dataPorc"
+
 
 const props = defineProps<{
   show: boolean
@@ -97,46 +99,66 @@ const formRef = ref<FormInst | null>(null)
 const showModal = ref(props.show)
 const message=useMessage()
 const formValue = ref({
-    logisticsNo:'',
-    logisticsCompany:'',
-    sender:'',
-    senderPhone:'',
-    receiver:'',
-    receiverPhone:'',
-    receiverAddress:'',
-    sendDate:'',
-    expectedArrivalDate:'',
-    actualArrivalDate:'',
-    status:'',
-    trackingUrl:'',
-    notes:'',
-    id: undefined
+    wlmc: '',        // 物流名称
+    wljp: '',        // 物流简拼
+    lxr: '',         // 联系人
+    lxrJp: '',       // 联系人简拼
+    lxrPhone: '',    // 联系人电话
+    otherContact: '', // 其它联系方式
+    contactAddress: '', // 联系地址
+    lwdq: null,      // 来往地区
+    ffdsrq: null,    // 发放代收日期
+    dscsjl: '',      // 代收隔收天数
+    ffdsfs: '',      // 发放代收方式
+    bz: '',          // 备注
+    id: undefined    // ID（编辑时使用）
 })
 
 // 下拉框选项
-const statusOptions = ref<SelectOption[]>([
-    { label: '待发货', value: '待发货' },
-    { label: '已发货', value: '已发货' },
-    { label: '运输中', value: '运输中' },
-    { label: '已到达', value: '已到达' },
-    { label: '已签收', value: '已签收' },
-    { label: '异常', value: '异常' }
-])
+const lwdqOptions = ref<SelectOption[]>([])
+const ffdsrqOptions = ref<SelectOption[]>([])
+
+// 获取物流相关的下拉框数据
+async function fetchLogisticsOptions() {
+  try {
+    // 获取物流列表
+    const logistics = await apiClient.get('/v1/logistics')
+    
+    // 提取唯一的选项值
+    const regions = new Set<string>()
+    const collectionDates = new Set<string>()
+    
+    logistics.forEach((item: any) => {
+      // 处理来往地区
+      if (item.lwdq) regions.add(item.lwdq)
+      
+      // 处理发放代收日期
+      if (item.ffdsrq) collectionDates.add(item.ffdsrq)
+    })
+    
+    // 转换为下拉框选项格式
+    lwdqOptions.value = Array.from(regions).map(region => ({ label: region, value: region }))
+    ffdsrqOptions.value = Array.from(collectionDates).map(date => ({ label: date, value: date }))
+  } catch (error) {
+    message.error('获取物流选项数据失败，请重试')
+    console.error('获取物流选项数据失败：', error)
+  }
+}
 
 const rules = {
-    logisticsNo: {
+    wlmc: {
         required: true,
-        message: '请输入物流单号',
+        message: '请输入物流名称',
         trigger: 'blur'
     },
-    logisticsCompany: {
+    lxr: {
         required: true,
-        message: '请输入物流公司',
+        message: '请输入联系人',
         trigger: 'blur'
     },
-    status: {
+    lxrPhone: {
         required: true,
-        message: '请选择状态',
+        message: '请输入联系人电话',
         trigger: 'blur'
     }
 }
@@ -185,19 +207,18 @@ function handleClearForm() {
   if (!formRef.value) return
   // 重置表单数据
   formValue.value = {
-    logisticsNo:'',
-    logisticsCompany:'',
-    sender:'',
-    senderPhone:'',
-    receiver:'',
-    receiverPhone:'',
-    receiverAddress:'',
-    sendDate:'',
-    expectedArrivalDate:'',
-    actualArrivalDate:'',
-    status:'',
-    trackingUrl:'',
-    notes:'',
+    wlmc: '',
+    wljp: '',
+    lxr: '',
+    lxrJp: '',
+    lxrPhone: '',
+    otherContact: '',
+    contactAddress: '',
+    lwdq: null,
+    ffdsrq: null,
+    dscsjl: '',
+    ffdsfs: '',
+    bz: '',
     id: undefined
   }
   // 清除表单校验状态
@@ -206,6 +227,13 @@ function handleClearForm() {
 // 监听 show 属性变化
 watch(() => props.show, (newVal) => {
   showModal.value = newVal
+})
+// 监控物流名称变化，提取首字母到物流简拼输入框
+watch(()=>formValue.value.wlmc, (newVal) => {
+  if (newVal) {
+    const jp = generatePinyinFirstLetter(newVal);//获取简拼
+    formValue.value.wljp = jp
+  }
 })
 
 // 监听 showModal 变化，触发 update:show 事件
@@ -218,19 +246,18 @@ watch(() => props.editData, (newData) => {
   if (newData) {
     // 填充表单数据
     formValue.value = {
-      logisticsNo: newData.logisticsNo || '',
-      logisticsCompany: newData.logisticsCompany || '',
-      sender: newData.sender || '',
-      senderPhone: newData.senderPhone || '',
-      receiver: newData.receiver || '',
-      receiverPhone: newData.receiverPhone || '',
-      receiverAddress: newData.receiverAddress || '',
-      sendDate: newData.sendDate || '',
-      expectedArrivalDate: newData.expectedArrivalDate || '',
-      actualArrivalDate: newData.actualArrivalDate || '',
-      status: newData.status || '',
-      trackingUrl: newData.trackingUrl || '',
-      notes: newData.notes || '',
+      wlmc: newData.wlmc || '',
+      wljp: newData.wljp || '',
+      lxr: newData.lxr || '',
+      lxrJp: newData.lxrJp || '',
+      lxrPhone: newData.lxrPhone || '',
+      otherContact: newData.otherContact || '',
+      contactAddress: newData.contactAddress || '',
+      lwdq: newData.lwdq || null,
+      ffdsrq: newData.ffdsrq || null,
+      dscsjl: newData.dscsjl || '',
+      ffdsfs: newData.ffdsfs || '',
+      bz: newData.bz || '',
       id: newData.id
     }
   } else {
@@ -245,6 +272,11 @@ function handleCancel() {
   showModal.value = false
   handleClearForm() // 取消时同时清空表单
 }
+
+// 组件挂载时获取下拉框数据
+onMounted(() => {
+  fetchLogisticsOptions()
+})
 
 //  重要：组件卸载时清理
 onUnmounted(() => {

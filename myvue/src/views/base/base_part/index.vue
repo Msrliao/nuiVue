@@ -37,6 +37,14 @@ const showAddModal = ref(false)
 // 编辑数据
 const editData = ref<PartInfoData | null>(null)
 
+// 大库表格选中的行数据
+const dkSelectedData = ref<any>(null)
+
+// 处理大库表格选中事件
+function handleDKSelect(data: any) {
+  dkSelectedData.value = data
+}
+
 function addInforShwo () {
   showAddModal.value = true
   editData.value = null
@@ -135,9 +143,9 @@ function handleEdit(data: PartInfoData) {
     </n-flex>
     <!-- 通过props传递数据和加载状态 -->
     <TableVue :data="partInfoData" :loading="partLoading" @edit="handleEdit" @refresh="handleRefresh" />
-    <DKTableVue :data="dkData" :loading="dkLoading" />
+    <DKTableVue :data="dkData" :loading="dkLoading" @select="handleDKSelect" />
     <n-flex>
-        <AddInforVue :show="showAddModal" :editData="editData" @close="showAddModal = false" @refresh="handleRefresh" />
+        <AddInforVue :show="showAddModal" :editData="editData" :dkData="dkSelectedData" @close="showAddModal = false" @refresh="handleRefresh" @clearDkData="dkSelectedData = null" />
     </n-flex>
 </template>
 <style scoped>

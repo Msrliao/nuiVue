@@ -75,8 +75,8 @@ export interface empData {
   gzjb: string; // 工资级别
   rzrq: string; // 入职日期
   syq: string; // 试用期
-  htsjzrq: string; // 合同起始日期
-  htsjzzrq: string; // 合同终止日期
+  htqsrq: string; // 合同起始日期
+  htzzrq: string; // 合同终止日期
   emergencyContact: string; // 紧急联系人
   emergencyContactPhone: string; // 紧急联系人电话
   bz: string; // 备注

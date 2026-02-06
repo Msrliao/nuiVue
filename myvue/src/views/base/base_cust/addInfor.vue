@@ -20,7 +20,7 @@
                         <n-input v-model:value="formValue.khjc" placeholder="请输入客户简称" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="客户简拼:" path="khjp">
-                        <n-input v-model:value="formValue.khjp" placeholder="请输入客户简拼"  disabled="false" clearable />
+                        <n-input v-model:value="formValue.khjp" placeholder="请输入客户简拼"  disabled="false" />
                     </n-form-item-gi >
                     <n-form-item-gi  label="客户全称:" path="khqc">
                         <n-input v-model:value="formValue.khqc" placeholder="请输入客户全称" clearable />

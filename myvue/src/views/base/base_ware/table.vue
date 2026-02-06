@@ -9,6 +9,9 @@
       :loading="loadingRef"
       striped
       :row-key="(row: WarehouseData) => row.id"
+      :max-height="maxHeight"
+      :scroll-x="scrollX"
+      virtual-scroll
     />
     <!-- 右键单击组件 -->
     <n-dropdown
@@ -27,10 +30,18 @@
 <script setup lang="ts" name ='仓库显示表格'>
 import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import { useMessage, useDialog } from 'naive-ui'
-import { h, nextTick, ref, onMounted, onUnmounted } from 'vue'
+import { h, nextTick, ref, onMounted, onUnmounted, computed } from 'vue'
 import apiClient from '@/utils/apiClient'
 import { useSharedStore } from '@/stores/useBaseWareStore'
 import type {WarehouseData, ApiResponse} from '@/types'
+
+// 时间格式化函数
+function formatDate(dateString: string | undefined): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+  return date.toISOString().split('T')[0];
+}
 
 const emit = defineEmits<{
   (e: 'edit', data: WarehouseData): void
@@ -85,29 +96,36 @@ function createColumns(): DataTableColumns<WarehouseData> {
     {
       type: 'selection',
       multiple: false,
+      width: 50
     },
     {
       title: '仓库名称',
       key: 'ckmc',
+      width: 150,
       sorter: 'default'
     },
     {
       title: '负责人',
       key: 'fzr',
+      width: 100,
       sorter: 'default'
     },
     {
       title: '联系电话',
-      key: 'lxdh'
+      key: 'lxdh',
+      width: 120
     },
     {
       title: '备注',
-      key: 'bz'
+      key: 'bz',
+      width: 200
     },
     {
       title: '创建时间',
       key: 'created_at',
-      sorter: 'default'
+      width: 150,
+      sorter: 'default',
+      render: (row) => formatDate(row.created_at)
     }
   ]
 }
@@ -115,6 +133,13 @@ function createColumns(): DataTableColumns<WarehouseData> {
 // 赋值表头
 const columns = createColumns()
 
+const maxHeight = computed(() => {
+  // 视口高度减去顶部搜索区域(约60px)、分页区域(约60px)和其他边距(约20px)
+  return window.innerHeight - 140
+})
+const scrollX = computed(() => {
+  return columns.reduce((sum, col) => sum + ((col as any).width || 0), 0)
+})
 // 右键单击选项表头
 const options: DropdownOption[] = [
   {

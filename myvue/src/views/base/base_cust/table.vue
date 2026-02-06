@@ -8,6 +8,9 @@
     :loading="props.loading"
     striped
     :row-key="(row: custData) => row.id"
+     :max-height="maxHeight"
+    :scroll-x="scrollX"
+    virtual-scroll
   />
   <n-dropdown
     placement="bottom-start"
@@ -24,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { h, nextTick, ref } from 'vue'
+import { h, nextTick, ref,computed } from 'vue'
 import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import { useMessage, useDialog } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
@@ -52,53 +55,65 @@ function createColumns(): DataTableColumns<custData> {
     {
       title: '客户简称',
       key: 'khjc',
-      sorter: 'default'
+      sorter: 'default',
+      width: 100
     },
     {
       title: '客户简拼',
       key: 'khjp',
-      sorter: 'default'
+      sorter: 'default',
+      width: 100
     },
     {
       title: '客户全称',
       key: 'khqc',
-      sorter: 'default'
+      sorter: 'default',
+      width: 150
     },
     {
       title: '联系人',
-      key: 'lxr'
+      key: 'lxr',
+      width: 80
     },
     {
       title: '联系电话',
-      key: 'lxdh'
+      key: 'lxdh',
+      width: 120
     },
     {
       title: '座机电话',
-      key: 'zxdh'
+      key: 'zxdh',
+      width: 120
     },
     {
       title: '其他联系方式',
-      key: 'qtlxfs'
+      key: 'qtlxfs',
+      width: 120
     },
     {
       title: '联系地址',
-      key: 'lxdz'
+      key: 'lxdz',
+      width: 200
     },
     {
       title: '银行账户名',
-      key: 'yhzhm'
+      key: 'yhzhm',
+      width: 120
     },
     {
       title: '银行账号',
-      key: 'yhzh'
+      key: 'yhzh',
+      width: 150
     },
     {
       title: '所属银行',
-      key: 'ssyh'
+      key: 'ssyh',
+      width: 120
     },
     {
       title: '客户类型',
       key: 'khlx',
+      width: 120,
       render(row) {
         return Array.isArray(row.khlx) ? row.khlx.join(', ') : row.khlx
       }
@@ -106,6 +121,7 @@ function createColumns(): DataTableColumns<custData> {
     {
       title: '经营范围',
       key: 'jyfw',
+      width: 150,
       render(row) {
         return Array.isArray(row.jyfw) ? row.jyfw.join(', ') : row.jyfw
       }
@@ -113,6 +129,7 @@ function createColumns(): DataTableColumns<custData> {
     {
       title: '所属地区',
       key: 'ssqd',
+      width: 120,
       render(row) {
         return Array.isArray(row.ssqd) ? row.ssqd.join(', ') : row.ssqd
       }
@@ -120,6 +137,7 @@ function createColumns(): DataTableColumns<custData> {
     {
       title: '付款方式',
       key: 'fkfs',
+      width: 120,
       render(row) {
         return Array.isArray(row.fkfs) ? row.fkfs.join(', ') : row.fkfs
       }
@@ -127,6 +145,7 @@ function createColumns(): DataTableColumns<custData> {
     {
       title: '默认物流',
       key: 'mrwl',
+      width: 120,
       render(row) {
         return Array.isArray(row.mrwl) ? row.mrwl.join(', ') : row.mrwl
       }
@@ -134,13 +153,15 @@ function createColumns(): DataTableColumns<custData> {
     {
       title: '默认运货方式',
       key: 'mryhfs',
+      width: 120,
       render(row) {
         return Array.isArray(row.mryhfs) ? row.mryhfs.join(', ') : row.mryhfs
       }
     },
     {
       title: '备注',
-      key: 'bz'
+      key: 'bz',
+      width: 200
     }
   ]
 }
@@ -149,7 +170,13 @@ function createColumns(): DataTableColumns<custData> {
 const message = useMessage()
 const dialog = useDialog()
 const columns = createColumns()
-
+const maxHeight = computed(() => {
+  // 视口高度减去顶部搜索区域(约60px)、分页区域(约60px)和其他边距(约20px)
+  return window.innerHeight - 140
+})
+const scrollX = computed(() => {
+  return columns.reduce((sum, col) => sum + ((col as any).width || 0), 0)
+})
 const options: DropdownOption[] = [
   {
     label: '编辑',
