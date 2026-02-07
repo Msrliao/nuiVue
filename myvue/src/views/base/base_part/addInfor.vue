@@ -26,7 +26,7 @@
                         <n-input v-model:value="formValue.mc" placeholder="请输入配件名称" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="简拼:" path="jp">
-                        <n-input v-model:value="formValue.jp" placeholder="请输入配件简拼" disabled="false" clearable />
+                        <n-input v-model:value="formValue.jp" placeholder="请输入配件简拼" :disabled="!active" clearable />
                     </n-form-item-gi >
                     <n-form-item-gi  label="车型:"  path="cx">
                         <n-select
@@ -121,6 +121,8 @@ import type { ApiResponse } from "@/types/index"
 import type { PartInfoData } from "@/types"
 import { generatePinyinFirstLetter } from "@/utils/dataPorc"
 
+// 禁用简拼
+const active =ref(false)
 // 定义信息提示
 const message = useMessage()
 // 定义表单实例

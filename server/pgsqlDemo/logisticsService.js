@@ -5,14 +5,16 @@ async function createLogistics(logistics) {
   const client = await getClient();
   try {
     const { wlmc, wljp, lxr, lxrJp, lxrPhone, otherContact, contactAddress, lwdq, ffdsrq, dscsjl, ffdsfs, bz } = logistics;
+    // 将 dscsjl 转换为整数（如果为空字符串则设为 null）
+    const dscsjlValue = dscsjl && dscsjl.toString().trim() !== '' ? parseInt(dscsjl, 10) : null;
     const result = await client.query(
       `INSERT INTO logistics (
-        wlmc, wljp, lxr, lxrJp, lxrPhone, otherContact, 
-        contactAddress, lwdq, ffdsrq, dscsjl, ffdsfs, bz
+        wlmc, wljp, lxr, lxrjp, lxrphone, othercontact, 
+        contactaddress, lwdq, ffdsrq, dscsjl, ffdsfs, bz
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *`,
       [wlmc, wljp, lxr, lxrJp, lxrPhone, otherContact, 
-       contactAddress, lwdq, ffdsrq, dscsjl, ffdsfs, bz]
+       contactAddress, lwdq, ffdsrq, dscsjlValue, ffdsfs, bz]
     );
     return result.rows[0];
   } finally {
@@ -47,15 +49,17 @@ async function updateLogistics(id, logistics) {
   const client = await getClient();
   try {
     const { wlmc, wljp, lxr, lxrJp, lxrPhone, otherContact, contactAddress, lwdq, ffdsrq, dscsjl, ffdsfs, bz } = logistics;
+    // 将 dscsjl 转换为整数（如果为空字符串则设为 null）
+    const dscsjlValue = dscsjl && dscsjl.toString().trim() !== '' ? parseInt(dscsjl, 10) : null;
     const result = await client.query(
       `UPDATE logistics
-       SET wlmc = $1, wljp = $2, lxr = $3, lxrJp = $4, lxrPhone = $5, 
-           otherContact = $6, contactAddress = $7, lwdq = $8, ffdsrq = $9, 
+       SET wlmc = $1, wljp = $2, lxr = $3, lxrjp = $4, lxrphone = $5, 
+           othercontact = $6, contactaddress = $7, lwdq = $8, ffdsrq = $9, 
            dscsjl = $10, ffdsfs = $11, bz = $12
        WHERE id = $13
        RETURNING *`,
       [wlmc, wljp, lxr, lxrJp, lxrPhone, otherContact, 
-       contactAddress, lwdq, ffdsrq, dscsjl, ffdsfs, bz, id]
+       contactAddress, lwdq, ffdsrq, dscsjlValue, ffdsfs, bz, id]
     );
     return result.rows[0] || null;
   } finally {

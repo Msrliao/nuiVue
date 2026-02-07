@@ -2,6 +2,7 @@
   <n-flex>
 
   <n-data-table
+    v-model:checked-row-keys="checkedRowKeys"
     :columns="columns"
     :data="props.data"
     :row-props="rowProps"
@@ -32,21 +33,45 @@ import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import { useMessage, useDialog } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
 
+// 解析 PostgreSQL 数组字符串格式: {"重庆","垫江"}
+function parsePostgresArray(value: any): string[] {
+  if (!value) return []
+  
+  // 如果已经是数组，直接返回
+  if (Array.isArray(value)) {
+    return value.map(String)
+  }
+  
+  // 处理 PostgreSQL 数组字符串格式
+  if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
+    try {
+      const content = value.slice(1, -1)
+      if (!content) return []
+      return content.split(',').map(item => 
+        item.trim().replace(/^"|"$/g, '')
+      ).filter(item => item)
+    } catch {
+      return [value]
+    }
+  }
+  
+  return value ? [String(value)] : []
+}
+
 interface RowData {
   id: number
-  logisticsNo: string; // 物流单号
-  logisticsCompany: string; // 物流公司
-  sender: string; // 发货人
-  senderPhone: string; // 发货人电话
-  receiver: string; // 收货人
-  receiverPhone: string; // 收货人电话
-  receiverAddress: string; // 收货地址
-  sendDate: string; // 发货日期
-  expectedArrivalDate: string; // 预计到达日期
-  actualArrivalDate: string; // 实际到达日期
-  status: string; // 状态
-  trackingUrl: string; // 跟踪网址
-  notes: string; // 备注
+  wlmc: string; // 物流名称
+  wljp: string; // 物流简拼
+  lxr: string; // 联系人
+  lxrjp: string; // 联系人简拼
+  lxrphone: string; // 联系人电话
+  othercontact: string; // 其它联系方式
+  contactaddress: string; // 联系地址
+  lwdq: string; // 来往地区
+  ffdsrq: string; // 发放代收日期
+  dscsjl: string; // 代收隔收天数
+  ffdsfs: string; // 发放代收方式
+  bz: string; // 备注
   created_at?: string; // 创建时间
   updated_at?: string; // 更新时间
 }
@@ -65,74 +90,80 @@ const emit = defineEmits<{
 
 // 定义右键点击的行数据
 const currentRow = ref<RowData | null>(null)
+// 定义选中行keys
+const checkedRowKeys = ref<number[]>([])
 
 function createColumns(): DataTableColumns<RowData> {
   return [
     {
-      title: '物流单号',
-      key: 'logisticsNo',
+      type: 'selection',
+      multiple: false,
+      width: 50
+    },
+    {
+      title: '物流名称',
+      key: 'wlmc',
       sorter: 'default',
       width: 140
     },
     {
-      title: '物流公司',
-      key: 'logisticsCompany',
+      title: '物流简拼',
+      key: 'wljp',
       sorter: 'default',
-      width: 140
-    },
-    {
-      title: '发货人',
-      key: 'sender',
       width: 100
     },
     {
-      title: '发货人电话',
-      key: 'senderPhone',
-      width: 130
-    },
-    {
-      title: '收货人',
-      key: 'receiver',
+      title: '联系人',
+      key: 'lxr',
       width: 100
     },
     {
-      title: '收货人电话',
-      key: 'receiverPhone',
+      title: '联系人简拼',
+      key: 'lxrjp',
+      width: 100
+    },
+    {
+      title: '联系人电话',
+      key: 'lxrphone',
       width: 130
     },
     {
-      title: '收货地址',
-      key: 'receiverAddress',
+      title: '其它联系方式',
+      key: 'othercontact',
+      width: 130
+    },
+    {
+      title: '联系地址',
+      key: 'contactaddress',
       width: 200
     },
     {
-      title: '发货日期',
-      key: 'sendDate',
+      title: '来往地区',
+      key: 'lwdq',
+      width: 150,
+      render(row) {
+        const items = parsePostgresArray(row.lwdq)
+        return items.join('|')
+      }
+    },
+    {
+      title: '发放代收日期',
+      key: 'ffdsrq',
       width: 120
     },
     {
-      title: '预计到达日期',
-      key: 'expectedArrivalDate',
-      width: 130
+      title: '代收隔收天数',
+      key: 'dscsjl',
+      width: 110
     },
     {
-      title: '实际到达日期',
-      key: 'actualArrivalDate',
-      width: 130
-    },
-    {
-      title: '状态',
-      key: 'status',
-      width: 100
-    },
-    {
-      title: '跟踪网址',
-      key: 'trackingUrl',
-      width: 200
+      title: '发放代收方式',
+      key: 'ffdsfs',
+      width: 120
     },
     {
       title: '备注',
-      key: 'notes',
+      key: 'bz',
       width: 200
     }
   ]
@@ -176,7 +207,7 @@ function handleSelect(key: string) {
     // 显示删除确认对话框
     dialog.warning({
       title: '确认删除',
-      content: `确定要删除物流资料"${currentRow.value.logisticsNo}"吗？此操作不可恢复。`,
+      content: `确定要删除物流资料"${currentRow.value.wlmc}"吗？此操作不可恢复。`,
       positiveText: '删除',
       negativeText: '取消',
       onPositiveClick: async () => {
@@ -214,8 +245,12 @@ function rowProps(row: RowData) {
     },
     // 左键点击事件
     onClick: (e: MouseEvent) => {
+      // 阻止事件冒泡，避免触发表格的点击事件
+      e.stopPropagation()
       // 保存当前左键点击的行数据
       currentRow.value = row
+      // 设置默认选中项
+      checkedRowKeys.value = [row.id]
     }
   }
 }
