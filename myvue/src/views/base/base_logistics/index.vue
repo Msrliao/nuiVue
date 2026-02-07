@@ -17,7 +17,18 @@ function parsePostgresArray(value: any): string[] {
   if (Array.isArray(value)) {
     return value.map(String)
   }
-
+  
+  // 如果是字符串，按逗号分割（处理 PostgreSQL 数组字符串格式）
+  if (typeof value === 'string') {
+    // 去除花括号并按逗号分割，同时去除双引号
+    return value
+      .replace(/^\{|\}$/g, '')  // 去除首尾的 { 和 }
+      .split(',')
+      .map((item: string) => item.trim().replace(/^"|"$/g, ''))  // 去除每个值的双引号
+      .filter((item: string) => item.length > 0)
+  }
+  
+  return []
 }
 
 // 表单搜索值
@@ -51,6 +62,9 @@ const dqOptions = ref<SelectOption[]>([])
 // 编辑数据
 const editData = ref<any | null>(null)
 const editDQData = ref<any | null>(null)
+
+// 选中的地区数据（用于 dqTable 显示）
+const selectedRegionData = ref<any[]>([])
 
 
 // 新增物流资料弹窗显示
@@ -88,7 +102,10 @@ async function refreshLogisticsData(params: any) {
 async function fetchLogisticsOptions() {
   try {
     // 获取物流列表
-    const logistics = await apiClient.get('/v1/logistics')
+    const response = await apiClient.get('/v1/logistics')
+    
+    // 处理响应数据（可能是数组或包含 data 属性的对象）
+    const logistics = Array.isArray(response) ? response : (response?.data || [])
 
     // 提取唯一的地区值（从数组中解析）
     const regions = new Set<string>()
@@ -139,6 +156,28 @@ function handleEdit(data: any) {
   editData.value = data
   showAddModal.value = true
 }
+
+// 处理地区编辑事件
+function handleDQEdit(data: any) {
+  editDQData.value = data
+  showDQAddModal.value = true
+}
+
+// 处理选中地区事件
+async function handleSelectRegions(regions: string[]) {
+  if (regions.length === 0) {
+    selectedRegionData.value = []
+    return
+  }
+  // 从 areas 表中获取匹配的地区资料
+  try {
+    const response = await apiClient.post('/v1/areas/by-names', { names: regions })
+    selectedRegionData.value = response || []
+  } catch (error) {
+    console.error('获取地区资料失败:', error)
+    selectedRegionData.value = []
+  }
+}
 </script>
 <template>
     <n-flex >
@@ -167,18 +206,18 @@ function handleEdit(data: any) {
         </n-button>
     </n-flex>
     <!-- 通过props传递数据和加载状态 -->
-    <TableVue :data="logisticsData" :loading="loading" @edit="handleEdit" @refresh="handleRefresh" />
+    <TableVue :data="logisticsData" :loading="loading" @edit="handleEdit" @refresh="handleRefresh" @select-regions="handleSelectRegions" />
      <n-flex>
         <n-button @click="dqaddInforShwo()">
             新增地区资料
         </n-button>
     </n-flex>
-    <DqTableVue :data="logisticsData" :loading="loading" @edit="handleEdit" @refresh="handleRefresh" />
+    <DqTableVue :data="selectedRegionData" :loading="loading" @edit="handleDQEdit" @refresh="handleRefresh" />
     <n-flex>
         <AddInforVue v-model:show="showAddModal" :editData="editData" @refresh="handleRefresh" />
     </n-flex>
     <n-flex>
-        <DQAddInforVue v-model:show="showDQAddModal" :editData="ediDQtData" @refresh="handleRefresh" />
+        <DQAddInforVue v-model:show="showDQAddModal" :editData="editDQData" @refresh="handleRefresh" />
     </n-flex>
 
 </template>

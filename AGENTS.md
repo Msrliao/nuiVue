@@ -9,14 +9,14 @@ Vue 3 + TypeScript auto parts management system (汽配进销存) with Naive UI 
 # Frontend (myvue/)
 cd myvue
 npm install
-npm run dev          # Start dev server on port 5173
+pmpm dev          # Start dev server on port 5173
 npm run build        # Production build
 npm run typecheck    # TypeScript checking (if configured)
 
 # Backend (server/)
 cd server
 npm install
-npm start            # Start Express server on port 3000
+npm run dev        # Start Express server on port 3000
 ```
 
 ## Testing

@@ -98,17 +98,23 @@ async function handleValidateClick() {
     
     // 准备提交数据
     const submitData = {
-      ...formValue.value
+      dq: formValue.value.dq,
+      dqjp: formValue.value.dqJp,
+      lxr: formValue.value.lxr,
+      lxdh: formValue.value.lxdh,
+      qtlxfs: formValue.value.qtlxfs,
+      lxdz: formValue.value.lxdz,
+      bz: formValue.value.bz
     }
     
-    // 调用后端API
+    // 调用后端API - 使用 areas 接口
     if (formValue.value.id) {
       // 有id字段，执行修改操作
-      await apiClient.put('/v1/logistics/' + formValue.value.id, submitData)
+      await apiClient.put('/v1/areas/' + formValue.value.id, submitData)
       message.success('数据修改成功')
     } else {
       // 无id字段，执行新增操作
-      await apiClient.post('/v1/logistics', submitData)
+      await apiClient.post('/v1/areas', submitData)
       message.success('数据保存成功')
     }
     
@@ -158,10 +164,10 @@ watch(() => showModal.value, (newVal) => {
 // 监听编辑数据变化
 watch(() => props.editData, (newData) => {
   if (newData) {
-    // 填充表单数据
+    // 填充表单数据 - 适配后端返回的字段名（snake_case）
     formValue.value = {
       dq: newData.dq || '',
-      dqJp: newData.dqJp || '',
+      dqJp: newData.dqjp || '',
       lxr: newData.lxr || '',
       lxdh: newData.lxdh || '',
       qtlxfs: newData.qtlxfs || '',

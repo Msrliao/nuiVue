@@ -1,6 +1,6 @@
 <script setup lang="ts" name="客户资料">
 import {ref, watch, onMounted} from 'vue'
-import type { FormInst, SelectOption } from 'naive-ui'
+import type { SelectOption } from 'naive-ui'
 //导入组件
 import TableVue from './table.vue'
 import AddInforVue from './addInfor.vue'

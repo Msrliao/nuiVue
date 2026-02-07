@@ -99,7 +99,7 @@ function createColumns(): DataTableColumns<RowData> {
     },
     {
       title: '备注',
-      key: 'notes',
+      key: 'bz',
       width: 200
     }
   ]

@@ -1,4 +1,20 @@
 const { getClient } = require('./db');
+const areaService = require('./areaService');
+
+// 解析 PostgreSQL 数组格式
+function parsePostgresArray(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.map(String);
+  if (typeof value === 'string') {
+    // 处理 PostgreSQL 数组格式 {a,b,c}
+    if (value.startsWith('{') && value.endsWith('}')) {
+      return value.slice(1, -1).split(',').filter(item => item);
+    }
+    // 处理逗号分隔的字符串
+    return value.split(',').filter(item => item.trim());
+  }
+  return [];
+}
 
 // 创建物流资料
 async function createLogistics(logistics) {
@@ -7,16 +23,49 @@ async function createLogistics(logistics) {
     const { wlmc, wljp, lxr, lxrJp, lxrPhone, otherContact, contactAddress, lwdq, ffdsrq, dscsjl, ffdsfs, bz } = logistics;
     // 将 dscsjl 转换为整数（如果为空字符串则设为 null）
     const dscsjlValue = dscsjl && dscsjl.toString().trim() !== '' ? parseInt(dscsjl, 10) : null;
-    const result = await client.query(
-      `INSERT INTO logistics (
-        wlmc, wljp, lxr, lxrjp, lxrphone, othercontact, 
-        contactaddress, lwdq, ffdsrq, dscsjl, ffdsfs, bz
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-      RETURNING *`,
-      [wlmc, wljp, lxr, lxrJp, lxrPhone, otherContact, 
-       contactAddress, lwdq, ffdsrq, dscsjlValue, ffdsfs, bz]
-    );
-    return result.rows[0];
+    
+    // 开始事务
+    await client.query('BEGIN');
+    
+    try {
+      // 1. 插入物流资料
+      const result = await client.query(
+        `INSERT INTO logistics (
+          wlmc, wljp, lxr, lxrjp, lxrphone, othercontact, 
+          contactaddress, lwdq, ffdsrq, dscsjl, ffdsfs, bz
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        RETURNING *`,
+        [wlmc, wljp, lxr, lxrJp, lxrPhone, otherContact, 
+         contactAddress, lwdq, ffdsrq, dscsjlValue, ffdsfs, bz]
+      );
+      
+      // 2. 解析来往地区数组
+      const regions = parsePostgresArray(lwdq);
+      
+      // 3. 为每个地区插入地区资料记录（到 areas 表）
+      for (const region of regions) {
+        if (!region || region.trim() === '') continue;
+        
+        // 检查该地区是否已存在于 areas 表
+        const existingArea = await areaService.getAreaByName(region.trim());
+        
+        if (!existingArea) {
+          // 地区不存在，只插入地区名称到 areas 表
+          await areaService.createArea({
+            dq: region.trim()
+          });
+        }
+      }
+      
+      // 提交事务
+      await client.query('COMMIT');
+      
+      return result.rows[0];
+    } catch (error) {
+      // 回滚事务
+      await client.query('ROLLBACK');
+      throw error;
+    }
   } finally {
     client.release();
   }

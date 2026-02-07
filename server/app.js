@@ -46,17 +46,25 @@ async function initDatabase() {
     // 删除现有的物流资料表（如果存在），以便重新创建正确的表结构
     await client.query(`DROP TABLE IF EXISTS logistics CASCADE;`);
     
-    // 创建物流资料表
+    // 创建物流资料表（同时支持物流资料和地区资料）
     await client.query(`
       CREATE TABLE IF NOT EXISTS logistics (
         id SERIAL PRIMARY KEY,
-        wlmc VARCHAR(100) NOT NULL,
+        -- 物流资料字段
+        wlmc VARCHAR(100),
         wljp VARCHAR(50),
+        -- 地区资料字段
+        dq VARCHAR(100),
+        dqjp VARCHAR(50),
+        -- 共用字段
         lxr VARCHAR(50),
         lxrJp VARCHAR(50),
         lxrPhone VARCHAR(20),
+        lxdh VARCHAR(20),
         otherContact VARCHAR(100),
+        qtlxfs VARCHAR(100),
         contactAddress TEXT,
+        lxdz TEXT,
         lwdq VARCHAR(255),
         ffdsrq VARCHAR(255),
         dscsjl INTEGER,
@@ -70,6 +78,26 @@ async function initDatabase() {
     // 创建物流表索引
     await client.query(`CREATE INDEX IF NOT EXISTS idx_logistics_wlmc ON logistics(wlmc);`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_logistics_wljp ON logistics(wljp);`);
+
+    // 创建地区资料表
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS areas (
+        id SERIAL PRIMARY KEY,
+        dq VARCHAR(100) NOT NULL,
+        dqjp VARCHAR(50),
+        lxr VARCHAR(50),
+        lxdh VARCHAR(20),
+        qtlxfs VARCHAR(100),
+        lxdz TEXT,
+        bz TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // 创建地区表索引
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_areas_dq ON areas(dq);`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_areas_dqjp ON areas(dqjp);`);
 
     console.log('数据库表结构初始化完成！');
   } catch (error) {
@@ -85,12 +113,14 @@ const partsService = require('./pgsqlDemo/partsService');
 const customerService = require('./pgsqlDemo/customerService');
 const employeeService = require('./pgsqlDemo/employeeService');
 const logisticsService = require('./pgsqlDemo/logisticsService');
+const areaService = require('./pgsqlDemo/areaService');
 const DK = require('./getDKData/getData');
 
 // 导入新的 REST API 路由（符合 API 设计最佳实践）
 const employeeRoutes = require('./routes/employees');
 const customerRoutes = require('./routes/customers');
 const logisticsRoutes = require('./routes/logistics');
+const areaRoutes = require('./routes/areas');
 const warehouseRoutes = require('./routes/warehouses');
 const positionRoutes = require('./routes/positions');
 const partsRoutes = require('./routes/parts');
@@ -143,6 +173,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/v1/employees', employeeRoutes);
 app.use('/api/v1/customers', customerRoutes);
 app.use('/api/v1/logistics', logisticsRoutes);
+app.use('/api/v1/areas', areaRoutes);
 app.use('/api/v1/warehouses', warehouseRoutes);
 app.use('/api/v1/positions', positionRoutes);
 app.use('/api/v1/parts', partsRoutes);

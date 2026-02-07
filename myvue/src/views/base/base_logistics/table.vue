@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, nextTick, ref } from 'vue'
+import { computed, h, nextTick, ref, watch } from 'vue'
 import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import { useMessage, useDialog } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
@@ -86,12 +86,26 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'refresh'): void
   (e: 'edit', data: RowData): void
+  (e: 'select-regions', regions: string[]): void
 }>()
 
 // 定义右键点击的行数据
 const currentRow = ref<RowData | null>(null)
 // 定义选中行keys
 const checkedRowKeys = ref<number[]>([])
+
+// 监听选中行变化，发送选中的地区数据
+watch(checkedRowKeys, (newKeys) => {
+  if (newKeys.length > 0) {
+    const selectedRow = props.data.find(row => row.id === newKeys[0])
+    if (selectedRow) {
+      const regions = parsePostgresArray(selectedRow.lwdq)
+      emit('select-regions', regions)
+    }
+  } else {
+    emit('select-regions', [])
+  }
+})
 
 function createColumns(): DataTableColumns<RowData> {
   return [

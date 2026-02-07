@@ -12,13 +12,13 @@
                     <n-input v-model:value="formValue.wlmc" placeholder="请输入物流名称" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="物流简拼:" path="wljp">
-                    <n-input v-model:value="formValue.wljp" placeholder="请输入物流简拼"  disabled="false"  />
+                    <n-input v-model:value="formValue.wljp" placeholder="请输入物流简拼"  :disabled="!active"  />
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系人:" path="lxr">
                     <n-input v-model:value="formValue.lxr" placeholder="请输入联系人" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系人简拼:" path="lxrJp">
-                    <n-input v-model:value="formValue.lxrJp" placeholder="请输入联系人简拼" disabled="false"  />
+                    <n-input v-model:value="formValue.lxrJp" placeholder="请输入联系人简拼" :disabled="!active"  />
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系人电话:" path="lxrPhone">
                     <n-input v-model:value="formValue.lxrPhone" placeholder="请输入联系人电话" clearable />
@@ -99,6 +99,17 @@ function parsePostgresArray(value: any): string[] {
     return value.map(String)
   }
   
+  // 如果是字符串，按逗号分割（处理 PostgreSQL 数组字符串格式）
+  if (typeof value === 'string') {
+    // 去除花括号并按逗号分割，同时去除双引号
+    return value
+      .replace(/^\{|\}$/g, '')  // 去除首尾的 { 和 }
+      .split(',')
+      .map((item: string) => item.trim().replace(/^"|"$/g, ''))  // 去除每个值的双引号
+      .filter((item: string) => item.length > 0)
+  }
+  
+  return []
 }
 
 
@@ -113,6 +124,8 @@ const emit = defineEmits<{
   (e: 'update:show', value: boolean): void
 }>()
 
+// 禁用简拼
+const active =ref(false)
 const formRef = ref<FormInst | null>(null)
 const showModal = ref(props.show)
 const message=useMessage()
@@ -132,44 +145,8 @@ const formValue = ref({
     id: undefined    // ID（编辑时使用）
 })
 
-// 下拉框选项
-// 来往地区选项 - 使用预定义的常用地区
-const lwdqOptions = ref<SelectOption[]>([
-  { label: '北京', value: '北京' },
-  { label: '天津', value: '天津' },
-  { label: '河北', value: '河北' },
-  { label: '山西', value: '山西' },
-  { label: '内蒙古', value: '内蒙古' },
-  { label: '辽宁', value: '辽宁' },
-  { label: '吉林', value: '吉林' },
-  { label: '黑龙江', value: '黑龙江' },
-  { label: '上海', value: '上海' },
-  { label: '江苏', value: '江苏' },
-  { label: '浙江', value: '浙江' },
-  { label: '安徽', value: '安徽' },
-  { label: '福建', value: '福建' },
-  { label: '江西', value: '江西' },
-  { label: '山东', value: '山东' },
-  { label: '河南', value: '河南' },
-  { label: '湖北', value: '湖北' },
-  { label: '湖南', value: '湖南' },
-  { label: '广东', value: '广东' },
-  { label: '广西', value: '广西' },
-  { label: '海南', value: '海南' },
-  { label: '重庆', value: '重庆' },
-  { label: '四川', value: '四川' },
-  { label: '贵州', value: '贵州' },
-  { label: '云南', value: '云南' },
-  { label: '西藏', value: '西藏' },
-  { label: '陕西', value: '陕西' },
-  { label: '甘肃', value: '甘肃' },
-  { label: '青海', value: '青海' },
-  { label: '宁夏', value: '宁夏' },
-  { label: '新疆', value: '新疆' },
-  { label: '台湾', value: '台湾' },
-  { label: '香港', value: '香港' },
-  { label: '澳门', value: '澳门' }
-])
+// 下拉框选项 - 从数据库动态加载
+const lwdqOptions = ref<SelectOption[]>([])
 const ffdsrqOptions = ref<SelectOption[]>([])
 const ffdsfsOptions = ref<SelectOption[]>([])
 
