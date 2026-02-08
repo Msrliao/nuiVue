@@ -129,7 +129,7 @@ function createColumns(): DataTableColumns<RowData> {
     {
       title: '来往地区',
       key: 'lwdq',
-      width: 150,     
+      width: 150,
       render: (row) => Array.isArray(row.lwdq) ? row.lwdq.join(' | ') : row.lwdq,
     },
     {

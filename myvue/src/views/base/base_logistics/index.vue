@@ -4,7 +4,6 @@ import TableVue from './table.vue'
 import AddInforVue from './addInfor.vue'
 import DQAddInforVue from './dqAddInfor.vue'
 import DqTableVue from './dqTable.vue'
-// 
 import {ref, watch, onMounted} from 'vue'
 import { debounce } from 'lodash'
 import apiClient from '@/utils/apiClient'

@@ -30,7 +30,7 @@ const partInfoData = ref<PartInfoData[]>([])
 const dkData = ref<any[]>([])
 // 加载状态
 const partLoading = ref(false)
-// 大库加载字体
+// 大库加载状态
 const dkLoading = ref(false)
 // 新增资料模态框显示状态
 const showAddModal = ref(false)
