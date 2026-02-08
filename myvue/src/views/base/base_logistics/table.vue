@@ -33,31 +33,6 @@ import type { DataTableColumns, DropdownOption } from 'naive-ui'
 import { useMessage, useDialog } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
 
-// 解析 PostgreSQL 数组字符串格式: {"重庆","垫江"}
-function parsePostgresArray(value: any): string[] {
-  if (!value) return []
-  
-  // 如果已经是数组，直接返回
-  if (Array.isArray(value)) {
-    return value.map(String)
-  }
-  
-  // 处理 PostgreSQL 数组字符串格式
-  if (typeof value === 'string' && value.startsWith('{') && value.endsWith('}')) {
-    try {
-      const content = value.slice(1, -1)
-      if (!content) return []
-      return content.split(',').map(item => 
-        item.trim().replace(/^"|"$/g, '')
-      ).filter(item => item)
-    } catch {
-      return [value]
-    }
-  }
-  
-  return value ? [String(value)] : []
-}
-
 interface RowData {
   id: number
   wlmc: string; // 物流名称
@@ -99,7 +74,7 @@ watch(checkedRowKeys, (newKeys) => {
   if (newKeys.length > 0) {
     const selectedRow = props.data.find(row => row.id === newKeys[0])
     if (selectedRow) {
-      const regions = parsePostgresArray(selectedRow.lwdq)
+      const regions = Array.isArray(selectedRow.lwdq) ? selectedRow.lwdq : []
       emit('select-regions', regions, selectedRow)
     }
   } else {
@@ -154,11 +129,8 @@ function createColumns(): DataTableColumns<RowData> {
     {
       title: '来往地区',
       key: 'lwdq',
-      width: 150,
-      render(row) {
-        const items = parsePostgresArray(row.lwdq)
-        return items.join('|')
-      }
+      width: 150,     
+      render: (row) => Array.isArray(row.lwdq) ? row.lwdq.join(' | ') : row.lwdq,
     },
     {
       title: '发放代收日期',

@@ -8,7 +8,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const config = require('./config');
 const { testConnection } = require('./pgsqlDemo/db');
-const { initDatabase } = require('./database/init');
 const { successResponse } = require('./middleware/response');
 
 // REST API 路由
@@ -66,8 +65,7 @@ async function startServer() {
     process.exit(1);
   }
   
-  // 初始化数据库表结构
-  await initDatabase();
+  
 
   app.listen(PORT, () => {
     console.log(`服务器运行在 http://localhost:${PORT}`);

@@ -39,14 +39,6 @@ function validateLogisticsData(req, res, next) {
     errors.push({ field: 'wlmc', message: '物流名称不能为空' });
   }
   
-  if (!lxr || lxr.trim() === '') {
-    errors.push({ field: 'lxr', message: '联系人不能为空' });
-  }
-  
-  if (!lxrPhone || lxrPhone.trim() === '') {
-    errors.push({ field: 'lxrPhone', message: '联系电话不能为空' });
-  }
-  
   if (errors.length > 0) {
     return errorResponse(
       res,

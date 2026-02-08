@@ -48,7 +48,7 @@ const emit = defineEmits<{
 // 定义右键点击的行数据
 const currentRow = ref<PartInfoData | null>(null)
 
-
+// 定义表头
 function createColumns(): DataTableColumns<PartInfoData> {
   return [
   

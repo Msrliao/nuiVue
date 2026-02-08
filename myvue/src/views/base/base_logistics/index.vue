@@ -1,38 +1,18 @@
 <script setup lang="ts" name="物流资料">
+// 加载组件
 import TableVue from './table.vue'
 import AddInforVue from './addInfor.vue'
 import DQAddInforVue from './dqAddInfor.vue'
-
 import DqTableVue from './dqTable.vue'
+// 
 import {ref, watch, onMounted} from 'vue'
 import { debounce } from 'lodash'
 import apiClient from '@/utils/apiClient'
 import type { SelectOption } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 
+// 
 const message = useMessage()
-
-// 解析 PostgreSQL 数组字符串格式
-function parsePostgresArray(value: any): string[] {
-  if (!value) return []
-  
-  // 如果已经是数组，直接返回
-  if (Array.isArray(value)) {
-    return value.map(String)
-  }
-  
-  // 如果是字符串，按逗号分割（处理 PostgreSQL 数组字符串格式）
-  if (typeof value === 'string') {
-    // 去除花括号并按逗号分割，同时去除双引号
-    return value
-      .replace(/^\{|\}$/g, '')  // 去除首尾的 { 和 }
-      .split(',')
-      .map((item: string) => item.trim().replace(/^"|"$/g, ''))  // 去除每个值的双引号
-      .filter((item: string) => item.length > 0)
-  }
-  
-  return []
-}
 
 // 表单搜索值
 const formValue = ref({
@@ -56,6 +36,9 @@ const debouncedSearchParams = ref({
 const logisticsData = ref<any[]>([])
 // 加载状态
 const loading = ref(false)
+// 来往地区表格加载状态
+const dqloading = ref(false)
+
 // 新增物流资料弹窗显示
 const showAddModal = ref(false)
 const showDQAddModal = ref(false)
@@ -64,6 +47,7 @@ const showDQAddModal = ref(false)
 const dqOptions = ref<SelectOption[]>([])
 // 编辑数据
 const editData = ref<any | null>(null)
+// 编辑地区数据
 const editDQData = ref<any | null>(null)
 
 // 选中的地区数据（用于 dqTable 显示）
@@ -91,12 +75,15 @@ async function fetchLogisticsData(params?: any) {
   try {
     // 使用统一的API接口，直接传递搜索参数
     const response = await apiClient.get('/v1/logistics', { params })
-    console.log("response",response)
+    console.log('response',response)
     // apiClient已经处理了响应格式，直接使用返回的数据
     logisticsData.value = response || []
+
+    dqOptions.value = Array.from(response).map(region => ({ label: region, value: region }))
   } catch (error: any) {
     console.error('获取物流数据失败:', error)
     logisticsData.value = []
+   
   } finally {
     loading.value = false
   }
@@ -107,33 +94,6 @@ async function refreshLogisticsData(params: any) {
   await fetchLogisticsData(params)
 }
 
-// 获取物流相关的下拉框数据（从数组中提取单个地区）
-async function fetchLogisticsOptions() {
-  try {
-    // 获取物流列表
-    const response = await apiClient.get('/v1/logistics')
-    
-    // 处理响应数据（可能是数组或包含 data 属性的对象）
-    const logistics = Array.isArray(response) ? response : (response?.data || [])
-
-    // 提取唯一的地区值（从数组中解析）
-    const regions = new Set<string>()
-    
-    logistics.forEach((item: any) => {
-      // 解析来往地区数组并添加每个地区
-      const regionArray = parsePostgresArray(item.lwdq)
-      regionArray.forEach((region: string) => {
-        if (region) regions.add(region)
-      })
-    })
-
-    // 转换为下拉框选项格式
-    dqOptions.value = Array.from(regions).map(region => ({ label: region, value: region }))
-  } catch (error) {
-    console.error('获取物流选项数据失败：', error)
-    dqOptions.value = []
-  }
-}
 
 // 防抖搜索函数，等待输入完成后1秒执行
 const debouncedSearch = debounce(() => {
@@ -151,8 +111,6 @@ watch(() => formValue.value, () => {
 onMounted(() => {
   // 初始化时刷新数据
   refreshLogisticsData(debouncedSearchParams.value)
-  // 获取下拉框选项数据
-  fetchLogisticsOptions()
 })
 
 // 刷新事件处理函数
@@ -174,11 +132,13 @@ function handleDQEdit(data: any) {
 
 // 处理选中地区事件
 async function handleSelectRegions(regions: string[], rowData?: any) {
+
   if (!rowData || !rowData.id) {
     selectedRegionData.value = []
     selectedLogisticsRow.value = null
     return
   }
+  dqloading.value = true
   // 保存选中的物流行数据
   selectedLogisticsRow.value = rowData
   // 从 areas 表中通过物流ID（index字段）获取地区资料
@@ -189,6 +149,7 @@ async function handleSelectRegions(regions: string[], rowData?: any) {
     console.error('获取地区资料失败:', error)
     selectedRegionData.value = []
   }
+  dqloading.value = false
 }
 </script>
 <template>
@@ -224,12 +185,12 @@ async function handleSelectRegions(regions: string[], rowData?: any) {
             新增地区资料
         </n-button>
     </n-flex>
-    <DqTableVue :data="selectedRegionData" :loading="loading" @edit="handleDQEdit" @refresh="handleRefresh" />
+    <DqTableVue :data="selectedRegionData" :loading="dqloading" @edit="handleDQEdit" @refresh="handleRefresh" />
     <n-flex>
         <AddInforVue v-model:show="showAddModal" :editData="editData" @refresh="handleRefresh" />
     </n-flex>
     <n-flex>
-        <DQAddInforVue v-model:show="showDQAddModal" :editData="editDQData" :selectedRegion="selectedLogisticsRow?.lwdq" :logisticsId="selectedLogisticsRow?.id" @refresh="handleRefresh" />
+        <DQAddInforVue v-model:show="showDQAddModal" :editData="editDQData" :selectedRegion="null" :logisticsId="selectedLogisticsRow?.id" @refresh="handleRefresh" />
     </n-flex>
 
 </template>

@@ -12,7 +12,7 @@
                     <n-input v-model:value="formValue.dq" placeholder="请输入地区名称" clearable />
                 </n-form-item-gi >
                 <n-form-item-gi  label="地区简拼:" path="dqJp">
-                    <n-input v-model:value="formValue.dqJp" placeholder="请输入地区简拼" clearable />
+                    <n-input v-model:value="formValue.dqJp" placeholder="请输入地区简拼" clearable :disabled="!active"  />
                 </n-form-item-gi >
                 <n-form-item-gi  label="联系人:" path="lxr">
                     <n-input v-model:value="formValue.lxr" placeholder="请输入联系人" clearable />
@@ -56,28 +56,6 @@ import { useMessage } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
 import { generatePinyinFirstLetter } from "@/utils/dataPorc"
 
-// 解析 PostgreSQL 数组字符串格式
-function parsePostgresArray(value: any): string[] {
-  if (!value) return []
-  
-  // 如果已经是数组，直接返回
-  if (Array.isArray(value)) {
-    return value.map(String)
-  }
-  
-  // 如果是字符串，按逗号分割（处理 PostgreSQL 数组字符串格式）
-  if (typeof value === 'string') {
-    // 去除花括号并按逗号分割，同时去除双引号
-    return value
-      .replace(/^\{|\}$/g, '')  // 去除首尾的 { 和 }
-      .split(',')
-      .map((item: string) => item.trim().replace(/^"|"$/g, ''))  // 去除每个值的双引号
-      .filter((item: string) => item.length > 0)
-  }
-  
-  return []
-}
-
 const props = defineProps<{
   show: boolean
   editData: any | null
@@ -91,6 +69,8 @@ const emit = defineEmits<{
   (e: 'update:show', value: boolean): void
 }>()
 
+// 禁用简拼
+const active =ref(false)
 const formRef = ref<FormInst | null>(null)
 const showModal = ref(props.show)
 const message=useMessage()
@@ -177,6 +157,12 @@ function handleClearForm() {
   // 清除表单校验状态
   formRef.value.restoreValidation()
 }
+watch(()=>formValue.value.dq, (newVal) => {
+  if (newVal) {
+    const jp = generatePinyinFirstLetter(newVal);//获取简拼
+    formValue.value.dqJp = jp
+  }
+})
 // 监听 show 属性变化
 watch(() => props.show, (newVal) => {
   showModal.value = newVal
@@ -204,14 +190,7 @@ watch(() => props.editData, (newData) => {
   } else {
     // 清空表单，如果有选中的地区则自动填充
     handleClearForm()
-    if (props.selectedRegion) {
-      const regions = parsePostgresArray(props.selectedRegion)
-      if (regions.length > 0) {
-        // 使用第一个地区作为默认值
-        formValue.value.dq = regions[0]
-        formValue.value.dqJp = generatePinyinFirstLetter(regions[0])
-      }
-    }
+    
   }
 }, { immediate: true })
 
@@ -222,10 +201,6 @@ function handleCancel() {
   handleClearForm() // 取消时同时清空表单
 }
 
-//  重要：组件卸载时清理
-onUnmounted(() => {
-  // 清理代码
-})
 </script>
 <style scoped>
 .n-button{

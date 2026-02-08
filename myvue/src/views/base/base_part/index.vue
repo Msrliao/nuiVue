@@ -1,4 +1,5 @@
 <script setup lang="ts" name="配件资料">
+
 import {ref,watch, onMounted} from 'vue'
 // 加载组件
 import TableVue from './table.vue'
@@ -16,7 +17,6 @@ const formValue = ref({
   gg: '',
   bm: ''
 })
-
 // 防抖后的搜索参数
 const debouncedSearchParams = ref({
   mc: '',
@@ -24,34 +24,29 @@ const debouncedSearchParams = ref({
   gg: '',
   bm: ''
 })
-
 // 表格数据
 const partInfoData = ref<PartInfoData[]>([])
+// 大库数据
 const dkData = ref<any[]>([])
-
 // 加载状态
 const partLoading = ref(false)
+// 大库加载字体
 const dkLoading = ref(false)
-
 // 新增资料模态框显示状态
 const showAddModal = ref(false)
-
 // 编辑数据
 const editData = ref<PartInfoData | null>(null)
-
 // 大库表格选中的行数据
 const dkSelectedData = ref<any>(null)
-
 // 处理大库表格选中事件
 function handleDKSelect(data: any) {
   dkSelectedData.value = data
 }
-
-function addInforShwo () {
+// 新增大库资料模态框显示状态
+function addDKInforShwo () {
   showAddModal.value = true
   editData.value = null
 }
-
 // 获取配件信息数据
 async function fetchPartInfoData(params: any) {
   partLoading.value = true
@@ -65,11 +60,16 @@ async function fetchPartInfoData(params: any) {
     partLoading.value = false
   }
 }
-
 // 获取大库数据
 async function fetchDKData(params: any) {
   dkLoading.value = true
   try {
+    // 如果请求数据为空，则不请求
+    if (!params.bm && !params.cx && !params.gg && !params.mc) {
+      dkData.value = []
+      return
+    }
+    // 否则请求大库数据
     const response = await apiClient.get('/DK-info', { params }) as any
     if (response && Array.isArray(response)) {
       dkData.value = response
@@ -106,7 +106,6 @@ watch(() => formValue.value, () => {
   debouncedSearch()
 }, { deep: true })
 onMounted(() => {
-  console.log('配件资料页面挂载')
   refreshAllData(debouncedSearchParams.value)
 })
 

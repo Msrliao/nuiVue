@@ -90,29 +90,6 @@ import { useMessage } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
 import { generatePinyinFirstLetter } from "@/utils/dataPorc"
 
-// 解析 PostgreSQL 数组字符串格式
-function parsePostgresArray(value: any): string[] {
-  if (!value) return []
-  
-  // 如果已经是数组，直接返回
-  if (Array.isArray(value)) {
-    return value.map(String)
-  }
-  
-  // 如果是字符串，按逗号分割（处理 PostgreSQL 数组字符串格式）
-  if (typeof value === 'string') {
-    // 去除花括号并按逗号分割，同时去除双引号
-    return value
-      .replace(/^\{|\}$/g, '')  // 去除首尾的 { 和 }
-      .split(',')
-      .map((item: string) => item.trim().replace(/^"|"$/g, ''))  // 去除每个值的双引号
-      .filter((item: string) => item.length > 0)
-  }
-  
-  return []
-}
-
-
 const props = defineProps<{
   show: boolean
   editData: any | null
@@ -166,16 +143,6 @@ async function fetchLogisticsOptions() {
         if (item.dq) regions.add(item.dq)
       })
     }
-    
-    // 同时从物流记录中提取地区作为补充
-    if (Array.isArray(logisticsData)) {
-      logisticsData.forEach((item: any) => {
-        const regionArray = parsePostgresArray(item.lwdq)
-        regionArray.forEach((region: string) => {
-          if (region) regions.add(region)
-        })
-      })
-    }
 
     // 转换为下拉框选项格式
     lwdqOptions.value = Array.from(regions).map(region => ({ label: region, value: region }))
@@ -202,21 +169,11 @@ async function fetchLogisticsOptions() {
     console.error('获取物流选项数据失败：', error)
   }
 }
-
+// 验证填写数据
 const rules = {
     wlmc: {
         required: true,
         message: '请输入物流名称',
-        trigger: 'blur'
-    },
-    lxr: {
-        required: true,
-        message: '请输入联系人',
-        trigger: 'blur'
-    },
-    lxrPhone: {
-        required: true,
-        message: '请输入联系人电话',
         trigger: 'blur'
     }
 }
@@ -248,38 +205,6 @@ async function handleValidateClick() {
       logisticsId = response?.id || response?.data?.id || null
       message.success('数据保存成功')
     }
-    
-    // 如果有地区数据且是新增操作，同时保存地区资料
-    if (logisticsId && formValue.value.lwdq && Array.isArray(formValue.value.lwdq) && formValue.value.lwdq.length > 0 && !formValue.value.id) {
-      try {
-        // 为每个地区创建areas记录
-        for (const regionName of formValue.value.lwdq) {
-          if (regionName && regionName.trim()) {
-            // 检查地区是否已存在
-            const existingAreas = await apiClient.get('/v1/areas', { params: { dq: regionName.trim() } })
-            const exists = Array.isArray(existingAreas) && existingAreas.some((area: any) => area.dq === regionName.trim())
-            
-            if (!exists) {
-              // 地区不存在，创建新记录
-              await apiClient.post('/v1/areas', {
-                dq: regionName.trim(),
-                dqjp: generatePinyinFirstLetter(regionName.trim()),
-                lxr: '',
-                lxdh: '',
-                qtlxfs: '',
-                lxdz: '',
-                bz: '',
-                index: logisticsId
-              })
-            }
-          }
-        }
-      } catch (areaError) {
-        console.error('保存地区资料失败:', areaError)
-        // 地区保存失败不影响物流保存的成功提示
-      }
-    }
-    
     // 关闭模态框
     showModal.value = false
     emit('close')
@@ -353,8 +278,7 @@ watch(() => props.editData, (newData) => {
       lxrPhone: newData.lxrphone || '',
       otherContact: newData.othercontact || '',
       contactAddress: newData.contactaddress || '',
-      // 解析 lwdq 为数组（支持多选）
-      lwdq: parsePostgresArray(newData.lwdq),
+      lwdq: newData.lwdq || null,
       ffdsrq: newData.ffdsrq || null,
       dscsjl: newData.dscsjl || '',
       ffdsfs: newData.ffdsfs || null,

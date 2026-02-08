@@ -198,7 +198,7 @@ function handleSelect(key: string) {
 // 单击外部
 function onClickoutside() {
   showDropdownRef.value = false
-   currentRow.value = null // 点击外部时清空当前行
+  currentRow.value = null // 点击外部时清空当前行
 }
 // 右键触发事件
 function rowProps(row: WarehouseData) {
