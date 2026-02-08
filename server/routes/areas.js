@@ -47,6 +47,22 @@ router.post('/by-names', async (req, res) => {
   }
 });
 
+// 根据物流ID获取地区资料（通过index字段）
+router.get('/by-logistics/:logisticsId', async (req, res) => {
+  try {
+    const logisticsId = parseInt(req.params.logisticsId);
+    if (isNaN(logisticsId)) {
+      return errorResponse(res, 400, '请求参数错误', 'logisticsId 必须是数字');
+    }
+
+    const areas = await areaService.getAreasByLogisticsId(logisticsId);
+    successResponse(res, areas);
+  } catch (error) {
+    console.error('根据物流ID获取地区资料失败:', error);
+    errorResponse(res, 500, '获取地区资料失败', error.message);
+  }
+});
+
 // 获取单个地区资料
 router.get('/:id', async (req, res) => {
   try {
@@ -73,12 +89,6 @@ router.post('/', async (req, res) => {
     const { dq } = req.body;
     if (!dq || dq.trim() === '') {
       return errorResponse(res, 400, '请求参数错误', '地区名称不能为空');
-    }
-    
-    // 检查是否已存在
-    const existing = await areaService.getAreaByName(dq.trim());
-    if (existing) {
-      return errorResponse(res, 409, '地区已存在', '该地区资料已存在');
     }
     
     const area = await areaService.createArea(req.body);

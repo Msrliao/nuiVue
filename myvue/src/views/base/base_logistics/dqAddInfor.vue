@@ -54,10 +54,35 @@ import { ref, onUnmounted, watch, onMounted } from 'vue'
 import type { FormInst, SelectOption } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 import apiClient from '@/utils/apiClient'
+import { generatePinyinFirstLetter } from "@/utils/dataPorc"
+
+// 解析 PostgreSQL 数组字符串格式
+function parsePostgresArray(value: any): string[] {
+  if (!value) return []
+  
+  // 如果已经是数组，直接返回
+  if (Array.isArray(value)) {
+    return value.map(String)
+  }
+  
+  // 如果是字符串，按逗号分割（处理 PostgreSQL 数组字符串格式）
+  if (typeof value === 'string') {
+    // 去除花括号并按逗号分割，同时去除双引号
+    return value
+      .replace(/^\{|\}$/g, '')  // 去除首尾的 { 和 }
+      .split(',')
+      .map((item: string) => item.trim().replace(/^"|"$/g, ''))  // 去除每个值的双引号
+      .filter((item: string) => item.length > 0)
+  }
+  
+  return []
+}
 
 const props = defineProps<{
   show: boolean
   editData: any | null
+  selectedRegion?: string | null
+  logisticsId?: number | null
 }>()
 
 const emit = defineEmits<{
@@ -96,7 +121,7 @@ async function handleValidateClick() {
     // 表单验证
     await formRef.value.validate()
     
-    // 准备提交数据
+    // 准备提交数据，添加index字段关联物流ID
     const submitData = {
       dq: formValue.value.dq,
       dqjp: formValue.value.dqJp,
@@ -104,7 +129,8 @@ async function handleValidateClick() {
       lxdh: formValue.value.lxdh,
       qtlxfs: formValue.value.qtlxfs,
       lxdz: formValue.value.lxdz,
-      bz: formValue.value.bz
+      bz: formValue.value.bz,
+      index: props.logisticsId || null
     }
     
     // 调用后端API - 使用 areas 接口
@@ -176,8 +202,16 @@ watch(() => props.editData, (newData) => {
       id: newData.id
     }
   } else {
-    // 清空表单
+    // 清空表单，如果有选中的地区则自动填充
     handleClearForm()
+    if (props.selectedRegion) {
+      const regions = parsePostgresArray(props.selectedRegion)
+      if (regions.length > 0) {
+        // 使用第一个地区作为默认值
+        formValue.value.dq = regions[0]
+        formValue.value.dqJp = generatePinyinFirstLetter(regions[0])
+      }
+    }
   }
 }, { immediate: true })
 

@@ -19,14 +19,14 @@ function generatePinyinFirstLetter(str) {
 async function createArea(area) {
   const client = await getClient();
   try {
-    const { dq, dqjp, lxr, lxdh, qtlxfs, lxdz, bz } = area;
+    const { dq, dqjp, lxr, lxdh, qtlxfs, lxdz, bz, index } = area;
     const dqjpValue = dqjp || generatePinyinFirstLetter(dq);
-    
+
     const result = await client.query(
-      `INSERT INTO areas (dq, dqjp, lxr, lxdh, qtlxfs, lxdz, bz)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO areas (dq, dqjp, lxr, lxdh, qtlxfs, lxdz, bz, index)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
-      [dq, dqjpValue, lxr || '', lxdh || '', qtlxfs || '', lxdz || '', bz || '']
+      [dq, dqjpValue, lxr || '', lxdh || '', qtlxfs || '', lxdz || '', bz || '', index || null]
     );
     return result.rows[0];
   } finally {
@@ -59,12 +59,28 @@ async function getAllAreas() {
 // 根据地区名称列表获取地区资料
 async function getAreasByNames(dqList) {
   if (!dqList || dqList.length === 0) return [];
-  
+
   const client = await getClient();
   try {
     const result = await client.query(
       'SELECT * FROM areas WHERE dq = ANY($1) ORDER BY id',
       [dqList]
+    );
+    return result.rows;
+  } finally {
+    client.release();
+  }
+}
+
+// 根据物流ID（index字段）获取地区资料
+async function getAreasByLogisticsId(logisticsId) {
+  if (!logisticsId) return [];
+
+  const client = await getClient();
+  try {
+    const result = await client.query(
+      'SELECT * FROM areas WHERE index = $1 ORDER BY id',
+      [logisticsId]
     );
     return result.rows;
   } finally {
@@ -87,14 +103,14 @@ async function getAreaById(id) {
 async function updateArea(id, area) {
   const client = await getClient();
   try {
-    const { dq, dqjp, lxr, lxdh, qtlxfs, lxdz, bz } = area;
+    const { dq, dqjp, lxr, lxdh, qtlxfs, lxdz, bz, index } = area;
     const result = await client.query(
       `UPDATE areas
-       SET dq = $1, dqjp = $2, lxr = $3, lxdh = $4, qtlxfs = $5, lxdz = $6, bz = $7,
+       SET dq = $1, dqjp = $2, lxr = $3, lxdh = $4, qtlxfs = $5, lxdz = $6, bz = $7, index = $8,
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $8
+       WHERE id = $9
        RETURNING *`,
-      [dq, dqjp, lxr, lxdh, qtlxfs, lxdz, bz, id]
+      [dq, dqjp, lxr, lxdh, qtlxfs, lxdz, bz, index || null, id]
     );
     return result.rows[0] || null;
   } finally {
@@ -158,6 +174,7 @@ module.exports = {
   getAreaByName,
   getAllAreas,
   getAreasByNames,
+  getAreasByLogisticsId,
   getAreaById,
   updateArea,
   deleteArea,

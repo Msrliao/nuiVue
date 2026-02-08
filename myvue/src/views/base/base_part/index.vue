@@ -1,13 +1,15 @@
 <script setup lang="ts" name="配件资料">
+import {ref,watch, onMounted} from 'vue'
+// 加载组件
 import TableVue from './table.vue'
 import DKTableVue from './DKTable.vue'
-
-import {ref,watch, onMounted} from 'vue'
 import AddInforVue from './addInfor.vue'
+
 import { debounce } from 'lodash'
 import apiClient from '@/utils/apiClient'
 import type { PartInfoData } from '@/types'
 
+// 定义搜索数据
 const formValue = ref({
   mc: '',
   cx: '',

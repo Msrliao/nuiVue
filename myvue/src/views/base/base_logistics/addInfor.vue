@@ -153,32 +153,50 @@ const ffdsfsOptions = ref<SelectOption[]>([])
 // 获取物流相关的下拉框数据
 async function fetchLogisticsOptions() {
   try {
-    // 获取物流列表
-    const logistics = await apiClient.get('/v1/logistics')
+    // 并行获取数据
+    const [areasData, logisticsData] = await Promise.all([
+      apiClient.get('/v1/areas'),
+      apiClient.get('/v1/logistics')
+    ])
 
-    // 提取唯一的选项值
+    // 处理来往地区选项（从地区表获取）
     const regions = new Set<string>()
-    const collectionDates = new Set<string>()
-    const collectionMethods = new Set<string>()
-
-    logistics.forEach((item: any) => {
-      // 处理来往地区（从数组中提取单个地区）
-      const regionArray = parsePostgresArray(item.lwdq)
-      regionArray.forEach((region: string) => {
-        if (region) regions.add(region)
+    if (Array.isArray(areasData)) {
+      areasData.forEach((item: any) => {
+        if (item.dq) regions.add(item.dq)
       })
-
-      // 处理发放代收日期
-      if (item.ffdsrq) collectionDates.add(item.ffdsrq)
-
-      // 处理发放代收方式
-      if (item.ffdsfs) collectionMethods.add(item.ffdsfs)
-    })
+    }
+    
+    // 同时从物流记录中提取地区作为补充
+    if (Array.isArray(logisticsData)) {
+      logisticsData.forEach((item: any) => {
+        const regionArray = parsePostgresArray(item.lwdq)
+        regionArray.forEach((region: string) => {
+          if (region) regions.add(region)
+        })
+      })
+    }
 
     // 转换为下拉框选项格式
     lwdqOptions.value = Array.from(regions).map(region => ({ label: region, value: region }))
-    ffdsrqOptions.value = Array.from(collectionDates).map(date => ({ label: date, value: date }))
-    ffdsfsOptions.value = Array.from(collectionMethods).map(method => ({ label: method, value: method }))
+    
+    // 使用预定义选项 + 从现有数据中提取的选项
+    const existingDates = new Set<string>()
+    const existingMethods = new Set<string>()
+    
+    if (Array.isArray(logisticsData)) {
+      logisticsData.forEach((item: any) => {
+        if (item.ffdsrq) existingDates.add(item.ffdsrq)
+        if (item.ffdsfs) existingMethods.add(item.ffdsfs)
+      })
+    }
+    
+    // 使用从现有数据中提取的选项
+    ffdsrqOptions.value = Array.from(existingDates)
+      .map(date => ({ label: date, value: date }))
+    
+    ffdsfsOptions.value = Array.from(existingMethods)
+      .map(method => ({ label: method, value: method }))
   } catch (error) {
     message.error('获取物流选项数据失败，请重试')
     console.error('获取物流选项数据失败：', error)
@@ -215,15 +233,51 @@ async function handleValidateClick() {
       ...formValue.value
     }
     
+    let logisticsId: number | null = null
+    
     // 调用后端API
     if (formValue.value.id) {
       // 有id字段，执行修改操作
       await apiClient.put('/v1/logistics/' + formValue.value.id, submitData)
+      logisticsId = formValue.value.id
       message.success('数据修改成功')
     } else {
       // 无id字段，执行新增操作
-      await apiClient.post('/v1/logistics', submitData)
+      const response = await apiClient.post('/v1/logistics', submitData)
+      // 获取返回的物流ID
+      logisticsId = response?.id || response?.data?.id || null
       message.success('数据保存成功')
+    }
+    
+    // 如果有地区数据且是新增操作，同时保存地区资料
+    if (logisticsId && formValue.value.lwdq && Array.isArray(formValue.value.lwdq) && formValue.value.lwdq.length > 0 && !formValue.value.id) {
+      try {
+        // 为每个地区创建areas记录
+        for (const regionName of formValue.value.lwdq) {
+          if (regionName && regionName.trim()) {
+            // 检查地区是否已存在
+            const existingAreas = await apiClient.get('/v1/areas', { params: { dq: regionName.trim() } })
+            const exists = Array.isArray(existingAreas) && existingAreas.some((area: any) => area.dq === regionName.trim())
+            
+            if (!exists) {
+              // 地区不存在，创建新记录
+              await apiClient.post('/v1/areas', {
+                dq: regionName.trim(),
+                dqjp: generatePinyinFirstLetter(regionName.trim()),
+                lxr: '',
+                lxdh: '',
+                qtlxfs: '',
+                lxdz: '',
+                bz: '',
+                index: logisticsId
+              })
+            }
+          }
+        }
+      } catch (areaError) {
+        console.error('保存地区资料失败:', areaError)
+        // 地区保存失败不影响物流保存的成功提示
+      }
     }
     
     // 关闭模态框

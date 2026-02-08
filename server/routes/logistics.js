@@ -84,6 +84,7 @@ function validateId(req, res, next) {
 
 /**
  * GET /api/v1/logistics
+ * 获取物流资料列表
  */
 router.get('/', async (req, res) => {
   try {
@@ -104,6 +105,7 @@ router.get('/', async (req, res) => {
 
 /**
  * GET /api/v1/logistics/:id
+ * 
  */
 router.get('/:id', validateId, async (req, res) => {
   try {

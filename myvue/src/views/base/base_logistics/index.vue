@@ -8,6 +8,9 @@ import {ref, watch, onMounted} from 'vue'
 import { debounce } from 'lodash'
 import apiClient from '@/utils/apiClient'
 import type { SelectOption } from 'naive-ui'
+import { useMessage } from 'naive-ui'
+
+const message = useMessage()
 
 // 解析 PostgreSQL 数组字符串格式
 function parsePostgresArray(value: any): string[] {
@@ -65,6 +68,8 @@ const editDQData = ref<any | null>(null)
 
 // 选中的地区数据（用于 dqTable 显示）
 const selectedRegionData = ref<any[]>([])
+// 当前选中的物流行数据
+const selectedLogisticsRow = ref<any | null>(null)
 
 
 // 新增物流资料弹窗显示
@@ -73,6 +78,10 @@ function addInforShwo () {
   editData.value = null
 }
 function dqaddInforShwo () {
+  if (!selectedLogisticsRow.value) {
+    message.warning('请先在上方的物流资料表格中选择一条记录')
+    return
+  }
   showDQAddModal.value = true
   editDQData.value = null
 }
@@ -164,14 +173,17 @@ function handleDQEdit(data: any) {
 }
 
 // 处理选中地区事件
-async function handleSelectRegions(regions: string[]) {
-  if (regions.length === 0) {
+async function handleSelectRegions(regions: string[], rowData?: any) {
+  if (!rowData || !rowData.id) {
     selectedRegionData.value = []
+    selectedLogisticsRow.value = null
     return
   }
-  // 从 areas 表中获取匹配的地区资料
+  // 保存选中的物流行数据
+  selectedLogisticsRow.value = rowData
+  // 从 areas 表中通过物流ID（index字段）获取地区资料
   try {
-    const response = await apiClient.post('/v1/areas/by-names', { names: regions })
+    const response = await apiClient.get(`/v1/areas/by-logistics/${rowData.id}`)
     selectedRegionData.value = response || []
   } catch (error) {
     console.error('获取地区资料失败:', error)
@@ -208,7 +220,7 @@ async function handleSelectRegions(regions: string[]) {
     <!-- 通过props传递数据和加载状态 -->
     <TableVue :data="logisticsData" :loading="loading" @edit="handleEdit" @refresh="handleRefresh" @select-regions="handleSelectRegions" />
      <n-flex>
-        <n-button @click="dqaddInforShwo()">
+        <n-button @click="dqaddInforShwo()" :disabled="!selectedLogisticsRow">
             新增地区资料
         </n-button>
     </n-flex>
@@ -217,7 +229,7 @@ async function handleSelectRegions(regions: string[]) {
         <AddInforVue v-model:show="showAddModal" :editData="editData" @refresh="handleRefresh" />
     </n-flex>
     <n-flex>
-        <DQAddInforVue v-model:show="showDQAddModal" :editData="editDQData" @refresh="handleRefresh" />
+        <DQAddInforVue v-model:show="showDQAddModal" :editData="editDQData" :selectedRegion="selectedLogisticsRow?.lwdq" :logisticsId="selectedLogisticsRow?.id" @refresh="handleRefresh" />
     </n-flex>
 
 </template>

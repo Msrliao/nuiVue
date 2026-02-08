@@ -86,7 +86,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'refresh'): void
   (e: 'edit', data: RowData): void
-  (e: 'select-regions', regions: string[]): void
+  (e: 'select-regions', regions: string[], rowData: RowData | null): void
 }>()
 
 // 定义右键点击的行数据
@@ -94,16 +94,16 @@ const currentRow = ref<RowData | null>(null)
 // 定义选中行keys
 const checkedRowKeys = ref<number[]>([])
 
-// 监听选中行变化，发送选中的地区数据
+// 监听选中行变化，发送选中的地区数据和行数据
 watch(checkedRowKeys, (newKeys) => {
   if (newKeys.length > 0) {
     const selectedRow = props.data.find(row => row.id === newKeys[0])
     if (selectedRow) {
       const regions = parsePostgresArray(selectedRow.lwdq)
-      emit('select-regions', regions)
+      emit('select-regions', regions, selectedRow)
     }
   } else {
-    emit('select-regions', [])
+    emit('select-regions', [], null)
   }
 })
 

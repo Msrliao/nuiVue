@@ -39,6 +39,9 @@ async function createLogistics(logistics) {
          contactAddress, lwdq, ffdsrq, dscsjlValue, ffdsfs, bz]
       );
       
+      // 获取新创建的物流ID
+      const logisticsId = result.rows[0].id;
+      
       // 2. 解析来往地区数组
       const regions = parsePostgresArray(lwdq);
       
@@ -50,9 +53,10 @@ async function createLogistics(logistics) {
         const existingArea = await areaService.getAreaByName(region.trim());
         
         if (!existingArea) {
-          // 地区不存在，只插入地区名称到 areas 表
+          // 地区不存在，插入地区名称到 areas 表，并关联物流ID
           await areaService.createArea({
-            dq: region.trim()
+            dq: region.trim(),
+            index: logisticsId  // 关联到物流资料的ID
           });
         }
       }
