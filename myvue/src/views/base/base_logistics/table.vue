@@ -155,10 +155,7 @@ function createColumns(): DataTableColumns<RowData> {
       title: '来往地区',
       key: 'lwdq',
       width: 150,
-      render(row) {
-        const items = parsePostgresArray(row.lwdq)
-        return items.join('|')
-      }
+      render: (row) => Array.isArray(row.lwdq) ? row.lwdq.join(' | ') : row.lwdq,
     },
     {
       title: '发放代收日期',

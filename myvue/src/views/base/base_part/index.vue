@@ -27,10 +27,12 @@ const debouncedSearchParams = ref({
 
 // 表格数据
 const partInfoData = ref<PartInfoData[]>([])
+// 大库表格数据
 const dkData = ref<any[]>([])
 
 // 加载状态
 const partLoading = ref(false)
+// 大库加载状态
 const dkLoading = ref(false)
 
 // 新增资料模态框显示状态

@@ -1,38 +1,18 @@
 <script setup lang="ts" name="物流资料">
+// 导入组件
 import TableVue from './table.vue'
 import AddInforVue from './addInfor.vue'
 import DQAddInforVue from './dqAddInfor.vue'
-
 import DqTableVue from './dqTable.vue'
+
 import {ref, watch, onMounted} from 'vue'
 import { debounce } from 'lodash'
 import apiClient from '@/utils/apiClient'
 import type { SelectOption } from 'naive-ui'
 import { useMessage } from 'naive-ui'
 
+// 
 const message = useMessage()
-
-// 解析 PostgreSQL 数组字符串格式
-function parsePostgresArray(value: any): string[] {
-  if (!value) return []
-  
-  // 如果已经是数组，直接返回
-  if (Array.isArray(value)) {
-    return value.map(String)
-  }
-  
-  // 如果是字符串，按逗号分割（处理 PostgreSQL 数组字符串格式）
-  if (typeof value === 'string') {
-    // 去除花括号并按逗号分割，同时去除双引号
-    return value
-      .replace(/^\{|\}$/g, '')  // 去除首尾的 { 和 }
-      .split(',')
-      .map((item: string) => item.trim().replace(/^"|"$/g, ''))  // 去除每个值的双引号
-      .filter((item: string) => item.length > 0)
-  }
-  
-  return []
-}
 
 // 表单搜索值
 const formValue = ref({
