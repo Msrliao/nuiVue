@@ -49,7 +49,7 @@ const menuOptions: MenuOption[] = [
     ],
   },
   {
-    label: '进货管理',
+    label: '采购管理',
     key: 'purchase', // 进货管理
     icon: renderIcon(EnterIcon),
     children: [

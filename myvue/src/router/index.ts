@@ -20,13 +20,13 @@ const componentMap = {
     '销售退货': markRaw(defineAsyncComponent(() => import('@/views/sales/sales_return/index.vue'))),
     '销售查询': markRaw(defineAsyncComponent(() => import('@/views/sales/sales_query/index.vue'))),
     '一键出入库': markRaw(defineAsyncComponent(() => import('@/views/sales/sales_stock_io/index.vue'))),
-    // // purchase 进货管理
-    // '采购进货': markRaw(defineAsyncComponent(() => import('@/views/purchase/Purchase.vue'))),
-    // '采购单据查询': markRaw(defineAsyncComponent(() => import('@/views/purchase/PurchaseQuery/PurchaseQueryReceipt.vue'))),
-    // '采购明细查询': markRaw(defineAsyncComponent(() => import('@/views/purchase/PurchaseQuery/PurchaseQueryDetail.vue'))),
-    // '采购退货': markRaw(defineAsyncComponent(() => import('@/views/purchase/PurchaseReturn/index.vue'))),
-    // '预采购': markRaw(defineAsyncComponent(() => import('@/views/print/index.vue'))),
-
+    // purchase 进货管理
+    '采购进货': markRaw(defineAsyncComponent(() => import('@/views/purchase/purchase_in/index.vue'))),
+    '采购单据查询': markRaw(defineAsyncComponent(() => import('@/views/purchase/purchase_query/purchase_order_q/index.vue'))),
+    '采购明细查询': markRaw(defineAsyncComponent(() => import('@/views/purchase/purchase_query/purchase_detail_q/index.vue'))),
+    '采购退货': markRaw(defineAsyncComponent(() => import('@/views/purchase/purchase_out/index.vue'))),
+    '预采购': markRaw(defineAsyncComponent(() => import('@/views/purchase/purchase_pre/index.vue'))),
+    '预退货': markRaw(defineAsyncComponent(() => import('@/views/purchase/purchase_pre_ret/index.vue'))),
 
 };
 export {componentMap} // 导出路由器

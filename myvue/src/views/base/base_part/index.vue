@@ -42,8 +42,8 @@ const dkSelectedData = ref<any>(null)
 function handleDKSelect(data: any) {
   dkSelectedData.value = data
 }
-// 新增大库资料模态框显示状态
-function addDKInforShwo () {
+// 新增资料模态框显示状态
+function addInforShwo () {
   showAddModal.value = true
   editData.value = null
 }
