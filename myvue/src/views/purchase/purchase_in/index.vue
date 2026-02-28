@@ -1,21 +1,76 @@
 <script setup lang="ts" name="采购进货">
-import { ref } from 'vue'
+import { ref, watch  } from 'vue'
 import { format, isAfter, isToday } from 'date-fns'
 import Table from './table.vue'
 import selectTable from '@/views/common/selectTable.vue'
+import type { DataTableColumns } from 'naive-ui'
+import { debounce } from 'lodash'
+import apiClient from '@/utils/apiClient'
+
+interface RowData {
+  key: number
+  khjc: string
+  khqc: string
+  lxr: string
+  lxdh: string
+}
 
 // 定义时间戳变量
 const timestamp = ref(Date.now())
-// const timeStr = ref(Date.now())
 const formRef = ref(null)
+const selectShowModal = ref(false)
+const modalStyle = ref({})
+const inputRef = ref<HTMLElement | null>(null)
+const loading = ref(false)
+const wlfsOptions = ref([
+  {
+    label: '物流方式1',
+    value: '物流方式1'
+  },
+  {
+    label: '物流方式2',
+    value: '物流方式2'
+  }
+])
+const yhfsOptions = ref([
+  {
+    label: '运货方式1',
+    value: '运货方式1'
+  },
+  {
+    label: '运货方式2',
+    value: '运货方式2'
+  }
+])
+const fkfsOptions = ref([
+  {
+    label: '付款方式1',
+    value: '付款方式1'
+  },
+  {
+    label: '付款方式2',
+    value: '付款方式2'
+  }
+])
+const selectTableShow = ref(false)
 const formValue = ref({
   gys: null,
   rq: timestamp,
   dh: 123456
 })
+// 请求参数接口
+interface SearchParams {
+  khjp?: string
+  lxdh?: string
+  lxrjp?: string
+  khlx?: string | string[]
+  khdq?: string | string[]
+}
 
-const size = ref('medium')
-const value = ref(null)
+// 表单搜索值
+const debouncedSearchParams = ref(<SearchParams>{})
+
+// 定义选择框的表格表头
 const selectColumns = ref<DataTableColumns<RowData>>( [
   {
     title: ' 客户简称',
@@ -35,36 +90,60 @@ const selectColumns = ref<DataTableColumns<RowData>>( [
     key: 'lxdh'
   }
 ])
-const selectData = ref([
-  {
-    key: 1,
-    khjc: '客户简称1',
-    khqc: '客户全称1',
-    lxr: '联系人1',
-    lxdh: '联系电话1'
-  },
-  {
-    key: 2,
-    khjc: '客户简称2',
-    khqc: '客户全称2',
-    lxr: '联系人2',
-    lxdh: '联系电话2'
-  },
-])
-const selectOptions = ref<DropdownOption[]>([])
+// 定义选择框的表格数据
+const selectData = ref([])
+// 定义选择框的表格数据获取函数
 const getSelectData = (selectKey: number) => {
-  console.log('选择了供应商:',selectKey)
   if (!selectKey) {
     return null
   }
-  selectOptions.value = [{
-    label: selectData.value.find(item => item.key === selectKey).khqc,
-    value: selectKey
-  }]
+  console.log(selectKey)
   // 选择框的值应该是 key
-  formValue.gys = selectKey.khqc
+  formValue.value.gys = selectData.value.find(item => item.id === selectKey)?.khqc || ''
+  // 关闭选择框
+  selectShowModal.value = false
 }
-const loading = ref(false)
+
+// 打开选择框表格
+async function openModal() {
+  selectShowModal.value = true 
+  if (inputRef.value) {
+    // 对于 Naive UI 组件，使用 $el 来获取 DOM 元素
+    const buttonElement = inputRef.value.$el || inputRef.value
+    const rect = buttonElement.getBoundingClientRect()
+    modalStyle.value = {
+      width: '600px',
+      position: 'fixed',
+      left: `${rect.left}px`,
+      top: `${rect.bottom + 10}px`
+    }
+  }
+  loading.value = true
+  const response = await apiClient.get('/v1/customers', { params: debouncedSearchParams.value }) as any
+  selectData.value = response || []
+  loading.value = false
+  
+}
+// 处理输入框获得焦点事件
+function handleFocus() {
+ openModal()
+}
+// 处理输入框失去焦点事件
+function handleBlur() {
+    selectShowModal.value = false
+}
+// 输入
+function handleInput(){
+  debouncedSearchParams.value.khjp = formValue.value.gys || ''
+  debouncedSearch()
+}
+// 防抖搜索函数，等待输入完成后1秒执行
+const debouncedSearch = debounce(() => {
+  openModal()
+}, 1000)
+
+
+
 </script>
 <template>
     <n-flex justify="center" align="center">
@@ -74,27 +153,30 @@ const loading = ref(false)
     </n-flex>
         <n-form    
           ref="formRef"    
-          :model="formValue"    
-          :rules="rules"   
+          :model="formValue"     
           label-placement="left"    
           label-width="auto"
+          
         >
           <n-grid cols="1 s:2 m:3 l:3 xl:3 2xl:3" responsive="screen" x-gap="12" y-gap="12">
                 <n-form-item-gi  label="供应商:" path="gys">
-                  <n-select
+                  <n-input
+                    ref="inputRef"
                     v-model:value="formValue.gys"
-                    :value="formValue.gys"
-                    :options="selectOptions"
-                    placeholder="请选择供应商"
-                    clearable
-                    filterable
-                    tag
-                    keyboard
+                    placeholder="请选择供应商" 
+                    clearable 
+                    @focus="handleFocus"
+                    @blur="handleBlur"
+                    @input="handleInput"
+                    />
+                  
+                  <n-modal
+                    v-model:show="selectShowModal"
+                    :style="modalStyle"        
+                    :show-mask="false"
                   >
-                    <template #empty>
-                      <selectTable :columns="selectColumns" :data="selectData" :loading="loading" :sendSelectData="getSelectData" />
-                    </template>
-                </n-select>
+                    <selectTable :columns="selectColumns" :data="selectData" :loading="loading" @sendSelectData="getSelectData" />
+                  </n-modal>
                 </n-form-item-gi >
                 <n-form-item-gi  label="进货日期:" path="rq">
                     <n-date-picker v-model:value="formValue.rq" type="datetime" clearable />
@@ -106,7 +188,6 @@ const loading = ref(false)
                 </n-form-item-gi >
             </n-grid >
             <Table />
-            <selectTable :columns="selectColumns" :data="selectData" :loading="loading" />
             <n-grid cols="1 s:2 m:3 l:3 xl:4 2xl:4" responsive="screen" x-gap="12" y-gap="12" >
               <n-form-item-gi  label="单据备注:" path="djbz">
                 <n-input v-model:value="formValue.bz" placeholder="请输入单据备注" clearable />
@@ -115,7 +196,7 @@ const loading = ref(false)
                 <n-select
                   v-model:value="formValue.fkfs"
                   placeholder="请选择付款方式"
-                  :options="options"
+                  :options="fkfsOptions"
                   clearable
                 />
               </n-form-item-gi>
@@ -126,7 +207,7 @@ const loading = ref(false)
                 <n-select
                   v-model:value="formValue.wlfs"
                   placeholder="请选择物流方式"
-                  :options="options"
+                  :options="wlfsOptions"
                   clearable
                 />
               </n-form-item-gi>
@@ -137,7 +218,7 @@ const loading = ref(false)
                 <n-select
                   v-model:value="formValue.yhfs"
                   placeholder="请选择运货方式"  
-                  :options="options"
+                  :options="yhfsOptions"
                   clearable
                 />
               </n-form-item-gi>
