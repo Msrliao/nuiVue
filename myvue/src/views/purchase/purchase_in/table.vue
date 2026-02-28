@@ -75,15 +75,8 @@ const ShowOrEdit = {
   }
 }
 
-const data = ref<RowData[]>(Array.from({ length: 100 }).map((_, index) => ({
-  key: index,
-  name: `Edward King ${index}`,
-  age: 32,
-  address: `London, Park Lane no. ${index}`
-})))
-
+const data = ref<RowData[]>([])
 const scrollX = 800
-
 // 动态创建 render 函数
 function createRender(key: keyof RowData) {
   return (row: RowData) => {
@@ -103,22 +96,94 @@ function createRender(key: keyof RowData) {
 
 const columns = ref<DataTableColumns<RowData>>([
   {
-    title: 'Name',
-    key: 'name',
-    width: 200,
-    render: createRender('name')
+    title: '序号',
+    key: 'key',
+    width: 100,
+    render: (row: RowData) => row.key + 1
   },
   {
-    title: 'Age',
-    key: 'age',
+    title: '配件序码',
+    key: 'pjxm',
     width: 150,
-    render: createRender('age')
+    render: createRender('pjxm')
   },
   {
-    title: 'Address',
-    key: 'address',
+    title: '配件编码',
+    key: 'pjbm',
     width: 300,
-    render: createRender('address')
+    render: createRender('pjbm')
+  },
+  {
+    title: '配件名称',
+    key: 'pjmc',
+    width: 300,
+    render: createRender('pjmc')
+  },
+  {
+    title: '适用车型',
+    key: 'sycx',
+    width: 300,
+    render: createRender('sycx')
+  },
+  {
+    title: '品牌',
+    key: 'pp',
+    width: 300,
+    render: createRender('pp')
+  },
+  {
+    title: '单位',
+    key: 'dw',
+    width: 100,
+    render: createRender('dw')
+  },
+  {
+    title: '数量',
+    key: 'sl',
+    width: 100,
+    render: createRender('sl')
+  },
+  {
+    title: '单价',
+    key: 'dj',
+    width: 100,
+    render: createRender('dj')
+  },
+  {
+    title: '总价',
+    key: 'zj',
+    width: 100,
+    render: createRender('zj')
+  },
+  {
+    title: '预设批发价',
+    key: 'yspfj',
+    width: 100,
+    render: createRender('yspfj')
+  },
+  {
+    title: '预设销售价',
+    key: 'ysxsj',
+    width: 100,
+    render: createRender('ysxsj')
+  },
+  {
+    title: '规格型号',
+    key: 'ggxh',
+    width: 200,
+    render: createRender('ggxh')
+  },
+  {
+    title: '库位',
+    key: 'kw',
+    width: 100,
+    render: createRender('kw')
+  },
+  {
+    title: '备注',
+    key: 'bz',
+    width: 300,
+    render: createRender('bz')
   }
 ])
 
