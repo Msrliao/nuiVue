@@ -84,45 +84,41 @@ const data = ref<RowData[]>(Array.from({ length: 100 }).map((_, index) => ({
 
 const scrollX = 800
 
+// 动态创建 render 函数
+function createRender(key: keyof RowData) {
+  return (row: RowData) => {
+    return h(ShowOrEdit, {
+      value: row[key],
+      onUpdateValue: (value: string) => {
+        // 处理不同类型的字段
+        if (key === 'age') {
+          row[key] = Number(value) as any
+        } else {
+          row[key] = value as any
+        }
+      }
+    })
+  }
+}
+
 const columns = ref<DataTableColumns<RowData>>([
   {
     title: 'Name',
     key: 'name',
     width: 200,
-    render(row) {
-      return h(ShowOrEdit, {
-        value: row.name,
-        onUpdateValue: (value) => {
-          row.name = value
-        }
-      })
-    }
+    render: createRender('name')
   },
   {
     title: 'Age',
     key: 'age',
     width: 150,
-    render(row) {
-      return h(ShowOrEdit, {
-        value: row.age,
-        onUpdateValue: (value) => {
-          row.age = Number(value)
-        }
-      })
-    }
+    render: createRender('age')
   },
   {
     title: 'Address',
     key: 'address',
     width: 300,
-    render(row) {
-      return h(ShowOrEdit, {
-        value: row.address,
-        onUpdateValue: (value) => {
-          row.address = value
-        }
-      })
-    }
+    render: createRender('address')
   }
 ])
 
