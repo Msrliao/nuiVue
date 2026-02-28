@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { format, isAfter, isToday } from 'date-fns'
 import Table from './table.vue'
+import selectTable from '@/views/common/selectTable.vue'
 
 // 定义时间戳变量
 const timestamp = ref(Date.now())
@@ -15,30 +16,55 @@ const formValue = ref({
 
 const size = ref('medium')
 const value = ref(null)
-const options = [
+const selectColumns = ref<DataTableColumns<RowData>>( [
   {
-    label: ' My Monkey',
-    value: 'song0',
-    disabled: true
+    title: ' 客户简称',
+    key: 'khjc',
+    width: 120
   },
   {
-    label: 'Drive My Car',
-    value: 'song1'
+    title: '客户全称',
+    key: 'khqc'
   },
   {
-    label: 'Norwegian Wood',
-    value: 'song2'
+    title: '联系人',
+    key: 'lxr'
   },
   {
-    label: 'You Won\'t See',
-    value: 'song3',
-    disabled: true
-  },
-  {
-    label: 'Nowhere Man',
-    value: 'song4'
+    title: '联系电话',
+    key: 'lxdh'
   }
-]
+])
+const selectData = ref([
+  {
+    key: 1,
+    khjc: '客户简称1',
+    khqc: '客户全称1',
+    lxr: '联系人1',
+    lxdh: '联系电话1'
+  },
+  {
+    key: 2,
+    khjc: '客户简称2',
+    khqc: '客户全称2',
+    lxr: '联系人2',
+    lxdh: '联系电话2'
+  },
+])
+const selectOptions = ref<DropdownOption[]>([])
+const getSelectData = (selectKey: number) => {
+  console.log('选择了供应商:',selectKey)
+  if (!selectKey) {
+    return null
+  }
+  selectOptions.value = [{
+    label: selectData.value.find(item => item.key === selectKey).khqc,
+    value: selectKey
+  }]
+  // 选择框的值应该是 key
+  formValue.gys = selectKey.khqc
+}
+const loading = ref(false)
 </script>
 <template>
     <n-flex justify="center" align="center">
@@ -46,22 +72,29 @@ const options = [
             采购进货
         </n-gradient-text>
     </n-flex>
-    
         <n-form    
-            ref="formRef"    
-            :model="formValue"    
-            :rules="rules"   
-            label-placement="left"    
-            label-width="auto"
+          ref="formRef"    
+          :model="formValue"    
+          :rules="rules"   
+          label-placement="left"    
+          label-width="auto"
         >
           <n-grid cols="1 s:2 m:3 l:3 xl:3 2xl:3" responsive="screen" x-gap="12" y-gap="12">
                 <n-form-item-gi  label="供应商:" path="gys">
-                    <n-select
-                        v-model:value="formValue.gys"
-                        placeholder="请选择供应商"
-                        :options="options"
-                        clearable
-                    />
+                  <n-select
+                    v-model:value="formValue.gys"
+                    :value="formValue.gys"
+                    :options="selectOptions"
+                    placeholder="请选择供应商"
+                    clearable
+                    filterable
+                    tag
+                    keyboard
+                  >
+                    <template #empty>
+                      <selectTable :columns="selectColumns" :data="selectData" :loading="loading" :sendSelectData="getSelectData" />
+                    </template>
+                </n-select>
                 </n-form-item-gi >
                 <n-form-item-gi  label="进货日期:" path="rq">
                     <n-date-picker v-model:value="formValue.rq" type="datetime" clearable />
@@ -73,6 +106,7 @@ const options = [
                 </n-form-item-gi >
             </n-grid >
             <Table />
+            <selectTable :columns="selectColumns" :data="selectData" :loading="loading" />
             <n-grid cols="1 s:2 m:3 l:3 xl:4 2xl:4" responsive="screen" x-gap="12" y-gap="12" >
               <n-form-item-gi  label="单据备注:" path="djbz">
                 <n-input v-model:value="formValue.bz" placeholder="请输入单据备注" clearable />

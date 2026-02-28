@@ -42,7 +42,7 @@ function formatDate(dateString: string | undefined): string {
   if (isNaN(date.getTime())) return '';
   return date.toISOString().split('T')[0];
 }
-
+// 
 const emit = defineEmits<{
   (e: 'edit', data: WarehouseData): void
 }>()
@@ -132,11 +132,12 @@ function createColumns(): DataTableColumns<WarehouseData> {
 
 // 赋值表头
 const columns = createColumns()
-
+// 定义表格最大高度
 const maxHeight = computed(() => {
   // 视口高度减去顶部搜索区域(约60px)、分页区域(约60px)和其他边距(约20px)
   return window.innerHeight - 140
 })
+// 定义表格水平滚动宽度
 const scrollX = computed(() => {
   return columns.reduce((sum, col) => sum + ((col as any).width || 0), 0)
 })

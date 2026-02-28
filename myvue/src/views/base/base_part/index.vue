@@ -1,5 +1,4 @@
 <script setup lang="ts" name="配件资料">
-
 import {ref,watch, onMounted} from 'vue'
 // 加载组件
 import TableVue from './table.vue'
@@ -29,9 +28,9 @@ const partInfoData = ref<PartInfoData[]>([])
 // 大库数据
 const dkData = ref<any[]>([])
 // 加载状态
-const partLoading = ref(false)
+const partTableLoading = ref(false)
 // 大库加载状态
-const dkLoading = ref(false)
+const dkTableLoading = ref(false)
 // 新增资料模态框显示状态
 const showAddModal = ref(false)
 // 编辑数据
@@ -49,7 +48,7 @@ function addInforShwo () {
 }
 // 获取配件信息数据
 async function fetchPartInfoData(params: any) {
-  partLoading.value = true
+  partTableLoading.value = true
   try {
     const response = await apiClient.get('/v1/parts', { params }) as any
     partInfoData.value = response || []
@@ -57,12 +56,12 @@ async function fetchPartInfoData(params: any) {
     console.error('获取配件数据失败:', error)
     partInfoData.value = []
   } finally {
-    partLoading.value = false
+    partTableLoading.value = false
   }
 }
 // 获取大库数据
 async function fetchDKData(params: any) {
-  dkLoading.value = true
+  dkTableLoading.value = true
   try {
     // 如果请求数据为空，则不请求
     if (!params.bm && !params.cx && !params.gg && !params.mc) {
@@ -70,7 +69,8 @@ async function fetchDKData(params: any) {
       return
     }
     // 否则请求大库数据
-    const response = await apiClient.get('/DK-info', { params }) as any
+    const response = await apiClient.get('/v1/dk', { params }) as any
+    console.log('获取大库数据成功:', response)
     if (response && Array.isArray(response)) {
       dkData.value = response
     } else {
@@ -80,7 +80,7 @@ async function fetchDKData(params: any) {
     console.error('获取大库数据失败:', error)
     dkData.value = []
   } finally {
-    dkLoading.value = false
+    dkTableLoading.value = false
   }
 }
 
@@ -143,8 +143,9 @@ function handleEdit(data: PartInfoData) {
         </n-button>
     </n-flex>
     <!-- 通过props传递数据和加载状态 -->
-    <TableVue :data="partInfoData" :loading="partLoading" @edit="handleEdit" @refresh="handleRefresh" />
-    <DKTableVue :data="dkData" :loading="dkLoading" @select="handleDKSelect" />
+    <TableVue :data="partInfoData" :loading="partTableLoading" @edit="handleEdit" @refresh="handleRefresh" />
+
+    <DKTableVue :data="dkData" :loading="dkTableLoading" @select="handleDKSelect" />
     <n-flex>
         <AddInforVue :show="showAddModal" :editData="editData" :dkData="dkSelectedData" @close="showAddModal = false" @refresh="handleRefresh" @clearDkData="dkSelectedData = null" />
     </n-flex>
